@@ -1,0 +1,220 @@
+/* ============================================
+   AI Quiz App – Custom Streamlit Theme
+   ============================================ */
+
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ─── Root Variables ──────────────────────────────────────────────── */
+:root {
+    --primary: #6C63FF;
+    --primary-light: #8B83FF;
+    --primary-dark: #4A42D4;
+    --secondary: #FF6584;
+    --accent: #00D2FF;
+    --success: #00C853;
+    --warning: #FFB300;
+    --danger: #FF5252;
+    --bg-dark: #0E1117;
+    --bg-card: #1A1D29;
+    --bg-card-hover: #22263A;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A0A4B8;
+    --border-subtle: rgba(108, 99, 255, 0.15);
+    --shadow-glow: 0 0 20px rgba(108, 99, 255, 0.15);
+    --radius: 12px;
+    --radius-lg: 16px;
+}
+
+/* ─── Global Overrides ────────────────────────────────────────────── */
+.stApp {
+    font-family: 'Inter', sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────── */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #13162B 0%, #0E1117 100%) !important;
+    border-right: 1px solid var(--border-subtle) !important;
+}
+
+section[data-testid="stSidebar"] .stMarkdown h1 {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem !important;
+}
+
+/* ─── Metric Cards ────────────────────────────────────────────────── */
+div[data-testid="stMetric"] {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius) !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: var(--shadow-glow) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+div[data-testid="stMetric"]:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 25px rgba(108, 99, 255, 0.25) !important;
+}
+
+div[data-testid="stMetric"] label {
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+    font-size: 1.8rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--primary-light), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────────── */
+.stButton > button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1.5rem !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 10px rgba(108, 99, 255, 0.3) !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.5) !important;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary)) !important;
+}
+
+.stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* ─── Tabs ────────────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0 !important;
+    background: var(--bg-card) !important;
+    border-radius: var(--radius) !important;
+    padding: 4px !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    border-radius: 8px !important;
+    padding: 0.5rem 1.5rem !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary) !important;
+    transition: all 0.2s ease !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+    color: white !important;
+}
+
+/* ─── Input Fields ────────────────────────────────────────────────── */
+.stTextInput > div > div {
+    border-radius: 8px !important;
+    border-color: var(--border-subtle) !important;
+    transition: border-color 0.2s ease !important;
+}
+
+.stTextInput > div > div:focus-within {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+.stSelectbox > div > div {
+    border-radius: 8px !important;
+}
+
+/* ─── Expander ────────────────────────────────────────────────────── */
+.streamlit-expanderHeader {
+    background: var(--bg-card) !important;
+    border-radius: var(--radius) !important;
+    border: 1px solid var(--border-subtle) !important;
+    font-weight: 600 !important;
+}
+
+/* ─── Data / Tables ───────────────────────────────────────────────── */
+.stDataFrame {
+    border-radius: var(--radius) !important;
+    overflow: hidden !important;
+}
+
+/* ─── Progress Bar ────────────────────────────────────────────────── */
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, var(--primary), var(--accent)) !important;
+    border-radius: 8px !important;
+}
+
+/* ─── Success / Error / Warning / Info ────────────────────────────── */
+div[data-testid="stAlert"] {
+    border-radius: var(--radius) !important;
+    border-left-width: 4px !important;
+}
+
+/* ─── Custom Card Containers ──────────────────────────────────────── */
+div.stMarkdown hr {
+    border-color: var(--border-subtle) !important;
+    margin: 1.5rem 0 !important;
+}
+
+/* ─── Animated Gradient Header ────────────────────────────────────── */
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+    background: linear-gradient(270deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+    background-size: 600% 600%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-shift 8s ease infinite;
+}
+
+/* ─── Quiz Timer ──────────────────────────────────────────────────── */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.timer-warning {
+    animation: pulse 1s ease-in-out infinite;
+    color: var(--danger) !important;
+}
+
+/* ─── Leaderboard Rank Styles ─────────────────────────────────────── */
+.rank-gold { color: #FFD700; font-size: 1.5rem; }
+.rank-silver { color: #C0C0C0; font-size: 1.4rem; }
+.rank-bronze { color: #CD7F32; font-size: 1.3rem; }
+
+/* ─── Scrollbar ───────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--primary-dark);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}

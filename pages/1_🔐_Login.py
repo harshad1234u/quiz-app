@@ -182,7 +182,7 @@ with tab_google:
 
             # Build Google OAuth URL
             from urllib.parse import urlencode
-            redirect_uri = _get_secret("GOOGLE_REDIRECT_URI", "http://localhost:8501")
+            redirect_uri = _get_secret("GOOGLE_REDIRECT_URI", "https://quiz-app-rhs.streamlit.app/Login")
             params = {
                 "client_id": google_client_id,
                 "redirect_uri": redirect_uri,

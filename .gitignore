@@ -2,6 +2,8 @@
 .env
 .env.local
 .env.*.local
+.env.prod
+.env.staging
 
 # Virtual Environments
 .venv/
@@ -39,11 +41,10 @@ MANIFEST
 .streamlit/secrets.json
 .streamlit/*.secrets
 
-# Database
+# Database (local files only — schema.sql is tracked)
 *.db
 *.sqlite
 *.sqlite3
-*.sql
 
 # Logs
 logs/
@@ -55,7 +56,6 @@ logs/
 *.swp
 *.swo
 *~
-.DS_Store
 .project
 .pydevproject
 .settings/
@@ -74,7 +74,3 @@ Thumbs.db
 # Node modules (if applicable)
 node_modules/
 npm-debug.log
-
-# OS-specific
-.env.prod
-.env.staging

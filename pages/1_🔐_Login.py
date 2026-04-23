@@ -3,9 +3,14 @@
 """
 import streamlit as st
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+
+def _get_secret(key, default=""):
+    """Read a config value from Streamlit secrets, with a fallback default."""
+    try:
+        return str(st.secrets[key]).strip()
+    except (KeyError, FileNotFoundError):
+        return default
 
 # ─── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Login – AI Quiz App", page_icon="🔐", layout="wide")
@@ -137,8 +142,8 @@ with tab_google:
     st.markdown("")
     col_left, col_form, col_right = st.columns([1, 2, 1])
     with col_form:
-        google_client_id = os.getenv("GOOGLE_CLIENT_ID", "")
-        google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+        google_client_id = _get_secret("GOOGLE_CLIENT_ID")
+        google_client_secret = _get_secret("GOOGLE_CLIENT_SECRET")
 
         if not google_client_id or not google_client_secret:
             st.markdown("""
@@ -148,11 +153,12 @@ with tab_google:
                 <div style="font-size: 3rem; margin-bottom: 1rem;">🌐</div>
                 <h3 style="color: #FAFAFA;">Google Sign-In</h3>
                 <p style="color: #A0A4B8;">
-                    To enable Google Sign-In, add your Google OAuth credentials to the <code>.env</code> file:
+                    To enable Google Sign-In, add your Google OAuth credentials to
+                    <code>.streamlit/secrets.toml</code> or Streamlit Cloud secrets:
                 </p>
                 <code style="color: #00D2FF;">
-                    GOOGLE_CLIENT_ID=your_client_id<br>
-                    GOOGLE_CLIENT_SECRET=your_client_secret
+                    GOOGLE_CLIENT_ID = "your_client_id"<br>
+                    GOOGLE_CLIENT_SECRET = "your_client_secret"
                 </code>
                 <p style="color: #A0A4B8; margin-top: 1rem; font-size: 0.85rem;">
                     Get credentials from 
@@ -176,7 +182,7 @@ with tab_google:
 
             # Build Google OAuth URL
             from urllib.parse import urlencode
-            redirect_uri = "http://localhost:8501"
+            redirect_uri = _get_secret("GOOGLE_REDIRECT_URI", "http://localhost:8501")
             params = {
                 "client_id": google_client_id,
                 "redirect_uri": redirect_uri,

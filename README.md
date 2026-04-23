@@ -1,10 +1,10 @@
 # 🧠 AI Quiz Application
 
-An AI-powered quiz application built with **Streamlit**, **MySQL**, and **Google Gemini API**.
+An AI-powered quiz application built with **Streamlit**, **Supabase (PostgreSQL)**, and **NVIDIA NIM API**.
 
 ## ✨ Features
 
-- **AI-Generated Questions** – Gemini generates MCQs with explanations
+- **AI-Generated Questions** – NVIDIA NIM generates MCQs with explanations
 - **Personalized Quizzes** – Recommendations based on user interests
 - **User Authentication** – Email/password + Google OAuth
 - **Timed Quiz Gameplay** – With question navigation and progress tracking
@@ -15,69 +15,129 @@ An AI-powered quiz application built with **Streamlit**, **MySQL**, and **Google
 ## 📁 Project Structure
 
 ```
-quiz app/
+quiz-app/
 ├── app.py                    # Main entry (home page)
 ├── requirements.txt          # Dependencies
-├── .env.example              # Environment template
-├── assets/style.css          # Custom CSS
+├── .gitignore                # Git exclusions
+├── README.md                 # This file
+├── assets/
+│   └── style.css             # Custom CSS
+├── data/
+│   └── fallback_questions.json  # Offline question bank
 ├── database/
-│   ├── schema.sql            # MySQL DDL
-│   └── init_db.py            # DB initializer
+│   ├── schema.sql            # PostgreSQL DDL (run in Supabase SQL Editor)
+│   └── init_db.py            # Setup instructions
 ├── utils/
-│   ├── db.py                 # MySQL connection pool
+│   ├── __init__.py
+│   ├── db.py                 # Supabase client singleton
 │   ├── auth.py               # Authentication logic
-│   ├── gemini_ai.py          # Gemini API integration
+│   ├── gemini_ai.py          # NVIDIA NIM API integration
 │   └── quiz.py               # Quiz logic & analytics
-└── pages/
-    ├── 1_🔐_Login.py         # Login / Register / Google
-    ├── 2_📊_Dashboard.py     # User dashboard
-    ├── 3_🧠_Quiz.py          # Quiz gameplay
-    ├── 4_📈_Results.py       # Analytics & history
-    ├── 5_🏆_Leaderboard.py   # Rankings
-    └── 6_⚙️_Admin.py         # Admin panel
+├── pages/
+│   ├── 1_🔐_Login.py         # Login / Register / Google
+│   ├── 2_📊_Dashboard.py     # User dashboard
+│   ├── 3_🧠_Quiz.py          # Quiz gameplay
+│   ├── 4_📈_Results.py       # Analytics & history
+│   ├── 5_🏆_Leaderboard.py   # Rankings
+│   └── 6_⚙️_Admin.py         # Admin panel
+└── .streamlit/
+    └── secrets.toml.example  # Secrets template
 ```
 
 ## 🚀 Setup Instructions
 
 ### Prerequisites
 - Python 3.10+
-- MySQL Server (running)
-- Google Gemini API Key
+- A Supabase account ([supabase.com](https://supabase.com))
+- NVIDIA NIM API Key ([build.nvidia.com](https://build.nvidia.com/))
 
-### Step 1: Install Dependencies
+### Step 1: Create Supabase Project
+1. Go to [supabase.com](https://supabase.com) → **New Project**
+2. Choose a name, password, and region
+3. Once created, go to **Settings → API** and copy:
+   - **Project URL** → `SUPABASE_URL`
+   - **anon public key** → `SUPABASE_KEY`
+
+### Step 2: Initialize Database
+1. In Supabase, go to **SQL Editor**
+2. Paste the contents of `database/schema.sql`
+3. Click **Run**
+
+This creates all tables, indexes, RLS policies, seed categories, and admin user.
+
+### Step 3: Clone & Install Dependencies
 ```bash
-cd "quiz app"
+git clone <your-repo-url>
+cd quiz-app
 pip install -r requirements.txt
 ```
 
-### Step 2: Configure Environment
+### Step 4: Configure Secrets
 ```bash
-copy .env.example .env
+cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 ```
-Edit `.env` with your credentials:
-```
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD=your_password
-MYSQL_DATABASE=quiz_app
-GEMINI_API_KEY=your_gemini_api_key
+Edit `.streamlit/secrets.toml` with your credentials:
+```toml
+SUPABASE_URL = "https://your-project-id.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUz..."
+NVIDIA_API_KEY = "nvapi-..."
 ```
 
-### Step 3: Initialize Database
-```bash
-python database/init_db.py
-```
-This creates the `quiz_app` database, all tables, default categories, and an admin user.
+> ⚠️ **Never commit `secrets.toml` to Git!** It is already in `.gitignore`.
 
-### Step 4: Run the App
+### Step 5: Run the App
 ```bash
 streamlit run app.py
 ```
 
-### Step 5: Login
+### Step 6: Login
 - **Admin:** `admin@quizapp.com` / `admin123`
 - Or register a new user account
+
+---
+
+## ☁️ Streamlit Cloud Deployment
+
+1. **Push your code** to GitHub (secrets are excluded via `.gitignore`).
+
+2. **Deploy on Streamlit Cloud:**
+   - Go to [share.streamlit.io](https://share.streamlit.io)
+   - Connect your GitHub repo
+   - Set the main file to `app.py`
+
+3. **Add Secrets** in the Streamlit Cloud dashboard:
+   - Go to **Settings → Secrets**
+   - Paste the contents of `.streamlit/secrets.toml.example` and fill in real values
+
+4. **Required secrets:**
+   ```toml
+   SUPABASE_URL = "https://your-project-id.supabase.co"
+   SUPABASE_KEY = "eyJhbGciOiJIUz..."
+   NVIDIA_API_KEY = "nvapi-..."
+   ```
+
+5. **Optional (Google OAuth):**
+   ```toml
+   GOOGLE_CLIENT_ID = "your_client_id"
+   GOOGLE_CLIENT_SECRET = "your_client_secret"
+   GOOGLE_REDIRECT_URI = "https://your-app.streamlit.app"
+   ```
+
+---
+
+## 🔗 Supabase Connection Details
+
+You need **two values** from your Supabase project:
+
+| Secret | Where to find it | Example |
+|--------|------------------|---------|
+| `SUPABASE_URL` | Settings → API → Project URL | `https://abcdefgh.supabase.co` |
+| `SUPABASE_KEY` | Settings → API → `anon` `public` key | `eyJhbGciOiJIUzI1NiIs...` |
+
+> ⚠️ Use the **anon public** key, NOT the `service_role` key.
+> Do NOT append `/rest/v1/` to the URL.
+
+---
 
 ## 🗄️ Database Schema
 
@@ -86,39 +146,27 @@ streamlit run app.py
 | `users` | User accounts (email, hashed password, google_id, role) |
 | `user_interests` | User interest selections |
 | `categories` | Quiz categories with icons |
-| `questions` | MCQ questions with 4 options, answer, explanation |
+| `questions` | MCQs with JSONB `options` array, correct answer, explanation |
 | `quiz_sessions` | Quiz attempt metadata (score, time, difficulty) |
 | `quiz_answers` | Per-question answer records |
 
-## 🤖 Gemini API Integration
+### Questions Options Format
+The `options` column stores choices as a JSONB array:
+```json
+["Option A", "Option B", "Option C", "Option D"]
+```
 
-The app uses Gemini to:
+## 🤖 AI Integration
+
+The app uses NVIDIA NIM API to:
 1. **Generate quiz questions** – Admin enters topic, difficulty, count → AI creates MCQs
 2. **Auto-fill gaps** – If a category lacks questions, AI generates more on-the-fly
 3. **Explain answers** – AI provides explanations for incorrect answers
 4. **Suggest topics** – Personalized quiz topic recommendations based on interests
 
-### Example Prompt
-```
-Generate 5 multiple-choice quiz questions about "SQL Injection" at Medium difficulty.
-Each with: question_text, option1-4, correct_answer, explanation.
-```
-
 ## 🔑 Google OAuth (Optional)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Create OAuth 2.0 credentials
-3. Set redirect URI to `http://localhost:8501`
-4. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to `.env`
-
-## 📸 Pages Overview
-
-| Page | Description |
-|---|---|
-| 🏠 Home | Landing page with feature cards and platform stats |
-| 🔐 Login | Email login, registration with interests, Google OAuth |
-| 📊 Dashboard | Stats, quick-start buttons, AI suggestions, history charts |
-| 🧠 Quiz | Category selection → timed gameplay → instant results |
-| 📈 Results | Score trends, radar chart, difficulty analysis, attempt history |
-| 🏆 Leaderboard | Top-3 podium, full rankings with user highlight |
-| ⚙️ Admin | AI generation, question CRUD, category management, user stats |
+3. Set redirect URI to your app URL
+4. Add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI` to secrets

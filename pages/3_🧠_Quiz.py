@@ -4,9 +4,6 @@
 import streamlit as st
 import os
 import time
-from dotenv import load_dotenv
-
-load_dotenv()
 
 st.set_page_config(page_title="Quiz – AI Quiz App", page_icon="🧠", layout="wide")
 

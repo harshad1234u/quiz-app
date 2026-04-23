@@ -3,10 +3,6 @@
 """
 import streamlit as st
 import os
-from dotenv import load_dotenv
-
-# ─── Load environment variables ──────────────────────────────────────────────
-load_dotenv()
 
 # ─── Page Config (must be the first Streamlit command) ────────────────────────
 st.set_page_config(
@@ -15,7 +11,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        "About": "AI-Powered Quiz Application built with Streamlit, MySQL & Google Gemini"
+        "About": "AI-Powered Quiz Application built with Streamlit, Supabase & NVIDIA NIM"
     }
 )
 
@@ -25,33 +21,43 @@ if os.path.exists(css_path):
     with open(css_path) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# ─── Environment Validation ──────────────────────────────────────────────────
-def _check_env():
-    """Check environment variables and return status."""
+
+# ─── Secrets Validation ─────────────────────────────────────────────────────
+def _get_secret(key, default=None):
+    """Read a config value from Streamlit secrets, with a fallback default."""
+    try:
+        return st.secrets[key]
+    except (KeyError, FileNotFoundError):
+        return default
+
+
+def _check_secrets():
+    """Check Streamlit secrets and return status."""
     checks = {
-        "MYSQL_HOST": ("MySQL Host", True),
-        "MYSQL_USER": ("MySQL User", True),
-        "MYSQL_PASSWORD": ("MySQL Password", True),
+        "SUPABASE_URL": ("Supabase URL", True),
+        "SUPABASE_KEY": ("Supabase Anon Key", True),
         "NVIDIA_API_KEY": ("NVIDIA NIM API Key", True),
         "GOOGLE_CLIENT_ID": ("Google OAuth Client ID", False),
         "GOOGLE_CLIENT_SECRET": ("Google OAuth Secret", False),
     }
     issues = []
     for var, (label, required) in checks.items():
-        val = os.getenv(var, "").strip()
+        val = _get_secret(var, "")
+        if isinstance(val, str):
+            val = val.strip()
         if not val and required:
             issues.append(f"❌ **{label}** (`{var}`) — missing")
         elif not val:
             issues.append(f"⚠️ {label} (`{var}`) — optional, not set")
     return issues
 
-env_issues = _check_env()
+env_issues = _check_secrets()
 critical_missing = [i for i in env_issues if i.startswith("❌")]
 if critical_missing:
-    st.error("⚠️ **Missing environment variables!** Check your `.env` file.")
+    st.error("⚠️ **Missing secrets!** Check `.streamlit/secrets.toml` or Streamlit Cloud settings.")
     for issue in critical_missing:
         st.markdown(issue)
-    st.info("Copy `.env.example` to `.env` and fill in the values. See the README for details.")
+    st.info("Copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and fill in the values. See the README for details.")
 
 # ─── Sidebar ─────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -59,7 +65,7 @@ with st.sidebar:
     st.caption("Powered by Google Gemini")
     st.divider()
 
-    # Show env status in sidebar
+    # Show config status in sidebar
     with st.expander("🔧 Config Status"):
         for issue in env_issues:
             st.markdown(issue, unsafe_allow_html=True)

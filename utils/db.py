@@ -1,77 +1,33 @@
 """
-Database utility module – connection pooling and query helpers.
+Database utility module – Supabase client singleton.
+
+Reads SUPABASE_URL and SUPABASE_KEY from Streamlit secrets.
+All modules import `supabase` from here to ensure a single client instance.
 """
-import os
-import mysql.connector
-from mysql.connector import pooling
-from dotenv import load_dotenv
+import streamlit as st
+from supabase import create_client, Client
 
-load_dotenv()
-
-_pool = None
+_client: Client | None = None
 
 
-def _get_pool():
-    """Lazy-initialise and return the connection pool."""
-    global _pool
-    if _pool is None:
-        _pool = pooling.MySQLConnectionPool(
-            pool_name="quiz_pool",
-            pool_size=5,
-            pool_reset_session=True,
-            host=os.getenv('MYSQL_HOST', 'localhost'),
-            port=int(os.getenv('MYSQL_PORT', 3306)),
-            user=os.getenv('MYSQL_USER', 'root'),
-            password=os.getenv('MYSQL_PASSWORD', ''),
-            database=os.getenv('MYSQL_DATABASE', 'quiz_app'),
-            charset='utf8mb4',
-            collation='utf8mb4_unicode_ci',
-            autocommit=False
-        )
-    return _pool
-
-
-def get_connection():
-    """Return a connection from the pool."""
-    return _get_pool().get_connection()
-
-
-def execute_query(query: str, params: tuple = None, commit: bool = True):
-    """Execute a write query (INSERT / UPDATE / DELETE). Returns lastrowid."""
-    conn = get_connection()
-    cursor = conn.cursor()
+def _get_secret(key: str, default=None):
+    """Read a config value from Streamlit secrets, with a fallback default."""
     try:
-        cursor.execute(query, params)
-        if commit:
-            conn.commit()
-        return cursor.lastrowid
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        cursor.close()
-        conn.close()
+        return st.secrets[key]
+    except (KeyError, FileNotFoundError):
+        return default
 
 
-def fetch_one(query: str, params: tuple = None) -> dict | None:
-    """Fetch a single row as a dictionary."""
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute(query, params)
-        return cursor.fetchone()
-    finally:
-        cursor.close()
-        conn.close()
-
-
-def fetch_all(query: str, params: tuple = None) -> list[dict]:
-    """Fetch all rows as a list of dictionaries."""
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute(query, params)
-        return cursor.fetchall()
-    finally:
-        cursor.close()
-        conn.close()
+def get_supabase() -> Client:
+    """Return the Supabase client singleton (lazy-initialised)."""
+    global _client
+    if _client is None:
+        url = _get_secret("SUPABASE_URL", "")
+        key = _get_secret("SUPABASE_KEY", "")
+        if not url or not key:
+            raise EnvironmentError(
+                "SUPABASE_URL and SUPABASE_KEY must be set in "
+                ".streamlit/secrets.toml or Streamlit Cloud secrets."
+            )
+        _client = create_client(url, key)
+    return _client

@@ -4,9 +4,6 @@
 import streamlit as st
 import os
 import pandas as pd
-from dotenv import load_dotenv
-
-load_dotenv()
 
 st.set_page_config(page_title="Admin – AI Quiz App", page_icon="⚙️", layout="wide")
 

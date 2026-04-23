@@ -10,18 +10,17 @@ Features:
   - Graceful fallback when quota is exhausted
   - Drop-in replacement for the old Gemini module (same public API)
   - Structured logging
+
+Reads credentials from Streamlit secrets (st.secrets) for cloud deployment.
 """
-import os
 import json
 import re
 import time
 import logging
 import hashlib
 import threading
+import streamlit as st
 from openai import OpenAI, RateLimitError, APIStatusError
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 logger = logging.getLogger("quiz_app.nvidia")
@@ -31,10 +30,26 @@ if not logger.handlers:
     _handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s %(name)s: %(message)s"))
     logger.addHandler(_handler)
 
+
+# ─── Secret helper ────────────────────────────────────────────────────────────
+def _get_secret(key: str, default=""):
+    """Read a config value from Streamlit secrets, with a fallback default."""
+    try:
+        return str(st.secrets[key]).strip()
+    except (KeyError, FileNotFoundError):
+        return default
+
+
 # ─── Config ───────────────────────────────────────────────────────────────────
-NVIDIA_API_KEY    = os.getenv("NVIDIA_API_KEY", "").strip()
-NVIDIA_BASE_URL   = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1").strip()
-NVIDIA_MODEL      = os.getenv("NVIDIA_MODEL", "meta/llama-3.3-70b-instruct").strip()
+def _load_config():
+    """Load config values lazily so they're read at runtime, not import-time."""
+    return {
+        "api_key": _get_secret("NVIDIA_API_KEY"),
+        "base_url": _get_secret("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+        "model": _get_secret("NVIDIA_MODEL", "meta/llama-3.3-70b-instruct"),
+    }
+
+
 MAX_RETRIES       = 3
 BASE_BACKOFF      = 2  # seconds
 
@@ -51,17 +66,19 @@ _client: OpenAI | None = None
 def _get_client() -> OpenAI:
     global _client
     if _client is None:
-        if not NVIDIA_API_KEY:
-            logger.error("NVIDIA_API_KEY is missing or empty in .env")
+        cfg = _load_config()
+        if not cfg["api_key"]:
+            logger.error("NVIDIA_API_KEY is missing in Streamlit secrets")
             raise EnvironmentError(
-                "NVIDIA_API_KEY is not configured. Add it to your .env file.\n"
+                "NVIDIA_API_KEY is not configured. Add it to .streamlit/secrets.toml "
+                "or Streamlit Cloud secrets.\n"
                 "Get your key at: https://build.nvidia.com/"
             )
         _client = OpenAI(
-            base_url=NVIDIA_BASE_URL,
-            api_key=NVIDIA_API_KEY,
+            base_url=cfg["base_url"],
+            api_key=cfg["api_key"],
         )
-        logger.info(f"NVIDIA NIM client initialised (model={NVIDIA_MODEL}, base_url={NVIDIA_BASE_URL})")
+        logger.info(f"NVIDIA NIM client initialised (model={cfg['model']}, base_url={cfg['base_url']})")
     return _client
 
 
@@ -82,6 +99,9 @@ def _call_nvidia(prompt: str, cache_key: str | None = None, max_tokens: int = 20
         logger.info(f"Cache hit for key {cache_key[:8]}...")
         return _request_cache[cache_key]
 
+    cfg = _load_config()
+    model = cfg["model"]
+
     with _api_lock:
         # Re-check inside lock (another thread may have populated it)
         if cache_key and cache_key in _request_cache:
@@ -93,9 +113,9 @@ def _call_nvidia(prompt: str, cache_key: str | None = None, max_tokens: int = 20
 
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                logger.info(f"NVIDIA API call (attempt {attempt}/{MAX_RETRIES}, model={NVIDIA_MODEL})")
+                logger.info(f"NVIDIA API call (attempt {attempt}/{MAX_RETRIES}, model={model})")
                 completion = client.chat.completions.create(
-                    model=NVIDIA_MODEL,
+                    model=model,
                     messages=[{"role": "user", "content": prompt}],
                     temperature=0.7,
                     max_tokens=max_tokens,

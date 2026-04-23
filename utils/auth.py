@@ -1,10 +1,10 @@
 """
 Authentication module – email/password + Google OAuth helpers.
+Uses Supabase (PostgREST) for all database operations.
 """
-import os
 import bcrypt
 import streamlit as st
-from utils.db import execute_query, fetch_one, fetch_all
+from utils.db import get_supabase
 
 # ─── Available interest topics ───────────────────────────────────────────────
 INTEREST_OPTIONS = [
@@ -31,33 +31,42 @@ def _verify_password(password: str, hashed: str) -> bool:
 # ─── Registration ─────────────────────────────────────────────────────────────
 def register_user(name: str, email: str, password: str, interests: list[str] | None = None) -> dict:
     """Register a new user. Returns {'success': bool, 'message': str, 'user': dict|None}."""
+    sb = get_supabase()
+
     # Check if email exists
-    existing = fetch_one("SELECT user_id FROM users WHERE email = %s", (email,))
-    if existing:
+    existing = sb.table("users").select("user_id").eq("email", email).execute()
+    if existing.data:
         return {"success": False, "message": "An account with this email already exists.", "user": None}
 
     hashed = _hash_password(password)
-    user_id = execute_query(
-        "INSERT INTO users (name, email, password, role) VALUES (%s, %s, %s, 'user')",
-        (name, email, hashed)
-    )
+    result = sb.table("users").insert({
+        "name": name,
+        "email": email,
+        "password": hashed,
+        "role": "user"
+    }).execute()
+
+    user = result.data[0] if result.data else None
+    if not user:
+        return {"success": False, "message": "Registration failed.", "user": None}
+
+    user_id = user["user_id"]
 
     # Save interests
     if interests:
-        for interest in interests:
-            execute_query(
-                "INSERT IGNORE INTO user_interests (user_id, interest_name) VALUES (%s, %s)",
-                (user_id, interest)
-            )
+        rows = [{"user_id": user_id, "interest_name": i} for i in interests]
+        sb.table("user_interests").upsert(rows, on_conflict="user_id,interest_name").execute()
 
-    user = fetch_one("SELECT * FROM users WHERE user_id = %s", (user_id,))
     return {"success": True, "message": "Registration successful!", "user": user}
 
 
 # ─── Email Login ──────────────────────────────────────────────────────────────
 def login_user(email: str, password: str) -> dict:
-    """Authenticate with email & password. Returns {'success': bool, 'message': str, 'user': dict|None}."""
-    user = fetch_one("SELECT * FROM users WHERE email = %s", (email,))
+    """Authenticate with email & password."""
+    sb = get_supabase()
+    result = sb.table("users").select("*").eq("email", email).execute()
+    user = result.data[0] if result.data else None
+
     if not user:
         return {"success": False, "message": "No account found with this email.", "user": None}
     if user.get("password") is None:
@@ -70,41 +79,47 @@ def login_user(email: str, password: str) -> dict:
 # ─── Google OAuth ─────────────────────────────────────────────────────────────
 def google_oauth_upsert(google_id: str, name: str, email: str, avatar_url: str = None) -> dict:
     """Create or update user via Google profile info. Returns user dict."""
-    user = fetch_one("SELECT * FROM users WHERE google_id = %s", (google_id,))
+    sb = get_supabase()
+
+    # Check by google_id first
+    result = sb.table("users").select("*").eq("google_id", google_id).execute()
+    user = result.data[0] if result.data else None
+
     if user:
-        execute_query(
-            "UPDATE users SET name=%s, email=%s, avatar_url=%s WHERE google_id=%s",
-            (name, email, avatar_url, google_id)
-        )
+        sb.table("users").update({
+            "name": name, "email": email, "avatar_url": avatar_url
+        }).eq("google_id", google_id).execute()
     else:
-        # Check if email already exists (registered via email)
-        existing = fetch_one("SELECT * FROM users WHERE email = %s", (email,))
-        if existing:
-            execute_query(
-                "UPDATE users SET google_id=%s, avatar_url=%s WHERE user_id=%s",
-                (google_id, avatar_url, existing["user_id"])
-            )
+        # Check if email already registered
+        existing = sb.table("users").select("*").eq("email", email).execute()
+        if existing.data:
+            sb.table("users").update({
+                "google_id": google_id, "avatar_url": avatar_url
+            }).eq("user_id", existing.data[0]["user_id"]).execute()
         else:
-            execute_query(
-                "INSERT INTO users (name, email, google_id, avatar_url, role) VALUES (%s,%s,%s,%s,'user')",
-                (name, email, google_id, avatar_url)
-            )
-    return fetch_one("SELECT * FROM users WHERE email = %s", (email,))
+            sb.table("users").insert({
+                "name": name, "email": email, "google_id": google_id,
+                "avatar_url": avatar_url, "role": "user"
+            }).execute()
+
+    # Fetch updated record
+    final = sb.table("users").select("*").eq("email", email).execute()
+    return final.data[0] if final.data else None
 
 
 # ─── Interests ────────────────────────────────────────────────────────────────
 def get_user_interests(user_id: int) -> list[str]:
-    rows = fetch_all("SELECT interest_name FROM user_interests WHERE user_id = %s", (user_id,))
-    return [r["interest_name"] for r in rows]
+    sb = get_supabase()
+    result = sb.table("user_interests").select("interest_name").eq("user_id", user_id).execute()
+    return [r["interest_name"] for r in result.data]
 
 
 def update_user_interests(user_id: int, interests: list[str]):
-    execute_query("DELETE FROM user_interests WHERE user_id = %s", (user_id,))
-    for interest in interests:
-        execute_query(
-            "INSERT IGNORE INTO user_interests (user_id, interest_name) VALUES (%s, %s)",
-            (user_id, interest)
-        )
+    sb = get_supabase()
+    sb.table("user_interests").delete().eq("user_id", user_id).execute()
+    if interests:
+        rows = [{"user_id": user_id, "interest_name": i} for i in interests]
+        sb.table("user_interests").upsert(rows, on_conflict="user_id,interest_name").execute()
 
 
 # ─── Session helpers ──────────────────────────────────────────────────────────

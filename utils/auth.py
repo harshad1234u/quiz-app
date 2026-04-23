@@ -60,12 +60,10 @@ def register_user(name: str, email: str, password: str, interests: list[str] | N
 
     hashed = _hash_password(password)
 
-    # Try a few payload shapes to tolerate minor schema drift across deployments.
+    # Try a couple payload shapes to tolerate role-column drift across deployments.
     insert_payloads = [
         {"name": name, "email": email, "password": hashed, "role": "user"},
         {"name": name, "email": email, "password": hashed},
-        {"username": name, "email": email, "password": hashed, "role": "user"},
-        {"username": name, "email": email, "password": hashed},
     ]
 
     result = None
@@ -179,7 +177,7 @@ def set_session_user(user: dict):
     st.session_state["user"] = user
     st.session_state["logged_in"] = True
     st.session_state["user_id"] = user["user_id"]
-    st.session_state["user_name"] = user["name"]
+    st.session_state["user_name"] = user.get("name") or user.get("email", "User")
     st.session_state["user_role"] = user.get("role", "user")
 
 

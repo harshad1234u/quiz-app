@@ -41,6 +41,24 @@ def _api_error_message(exc: APIError) -> str:
     return ""
 
 
+def _normalize_interests(interests: list[str] | None) -> list[str]:
+    """Return cleaned, deduplicated interest names."""
+    if not interests:
+        return []
+    cleaned = []
+    seen = set()
+    for item in interests:
+        name = str(item or "").strip()
+        if not name:
+            continue
+        key = name.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(name)
+    return cleaned
+
+
 # ─── Registration ─────────────────────────────────────────────────────────────
 def register_user(name: str, email: str, password: str, interests: list[str] | None = None) -> dict:
     """Register a new user. Returns {'success': bool, 'message': str, 'user': dict|None}."""
@@ -59,9 +77,12 @@ def register_user(name: str, email: str, password: str, interests: list[str] | N
             return {"success": False, "message": "An account with this email already exists.", "user": None}
 
     hashed = _hash_password(password)
+    selected_topics = _normalize_interests(interests)
 
     # Try a couple payload shapes to tolerate role-column drift across deployments.
     insert_payloads = [
+        {"name": name, "email": email, "password": hashed, "role": "user", "selected_topics": selected_topics},
+        {"name": name, "email": email, "password": hashed, "selected_topics": selected_topics},
         {"name": name, "email": email, "password": hashed, "role": "user"},
         {"name": name, "email": email, "password": hashed},
     ]
@@ -95,15 +116,14 @@ def register_user(name: str, email: str, password: str, interests: list[str] | N
     if not user:
         return {"success": False, "message": "Registration failed.", "user": None}
 
-    user_id = user["user_id"]
-
-    # Save interests
-    if interests:
-        rows = [{"user_id": user_id, "interest_name": i} for i in interests]
+    # Backfill selected_topics for deployments where insert payload omitted/failed selected_topics.
+    if selected_topics and not user.get("selected_topics"):
         try:
-            sb.table("user_interests").upsert(rows, on_conflict="user_id,interest_name").execute()
+            sb.table("users").update({"selected_topics": selected_topics}).eq("user_id", user["user_id"]).execute()
+            refreshed = sb.table("users").select("*").eq("user_id", user["user_id"]).limit(1).execute()
+            if refreshed.data:
+                user = refreshed.data[0]
         except APIError:
-            # Keep auth flow working even if interests table/policy differs.
             pass
 
     return {"success": True, "message": "Registration successful!", "user": user}
@@ -148,7 +168,7 @@ def google_oauth_upsert(google_id: str, name: str, email: str, avatar_url: str =
         else:
             sb.table("users").insert({
                 "name": name, "email": email, "google_id": google_id,
-                "avatar_url": avatar_url, "role": "user"
+                "avatar_url": avatar_url, "role": "user", "selected_topics": []
             }).execute()
 
     # Fetch updated record
@@ -159,16 +179,19 @@ def google_oauth_upsert(google_id: str, name: str, email: str, avatar_url: str =
 # ─── Interests ────────────────────────────────────────────────────────────────
 def get_user_interests(user_id: int) -> list[str]:
     sb = get_supabase()
-    result = sb.table("user_interests").select("interest_name").eq("user_id", user_id).execute()
-    return [r["interest_name"] for r in result.data]
+    try:
+        result = sb.table("users").select("selected_topics").eq("user_id", user_id).limit(1).execute()
+    except APIError:
+        return []
+
+    if not result.data:
+        return []
+    return _normalize_interests(result.data[0].get("selected_topics") or [])
 
 
 def update_user_interests(user_id: int, interests: list[str]):
     sb = get_supabase()
-    sb.table("user_interests").delete().eq("user_id", user_id).execute()
-    if interests:
-        rows = [{"user_id": user_id, "interest_name": i} for i in interests]
-        sb.table("user_interests").upsert(rows, on_conflict="user_id,interest_name").execute()
+    sb.table("users").update({"selected_topics": _normalize_interests(interests)}).eq("user_id", user_id).execute()
 
 
 # ─── Session helpers ──────────────────────────────────────────────────────────

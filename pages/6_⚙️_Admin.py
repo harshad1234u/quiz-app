@@ -69,20 +69,26 @@ with tab_gen:
     st.markdown("### 🤖 Generate Questions with Gemini AI")
     st.caption("Enter topic details and let AI create quiz questions automatically")
 
-    with st.form("gen_form"):
-        gen_cols = st.columns(2)
-        with gen_cols[0]:
-            categories = get_categories()
-            cat_map = {c["category_name"]: c["category_id"] for c in categories}
-            gen_category = st.selectbox("📚 Category", list(cat_map.keys()))
-            gen_topic = st.text_input("🏷️ Topic / Sub-topic",
-                                      placeholder="e.g., SQL Injection Prevention")
+    categories = [c for c in get_categories() if c.get("category_id")]
+    cat_map = {c["category_name"]: c["category_id"] for c in categories}
 
-        with gen_cols[1]:
-            gen_difficulty = st.selectbox("🎚️ Difficulty", ["Easy", "Medium", "Hard"], index=1)
-            gen_count = st.slider("📝 Number of Questions", 3, 20, 5)
+    if not cat_map:
+        st.warning("No categories available. Add at least one category first.")
+        gen_submit = False
+        gen_topic = ""
+    else:
+        with st.form("gen_form"):
+            gen_cols = st.columns(2)
+            with gen_cols[0]:
+                gen_category = st.selectbox("📚 Category", list(cat_map.keys()))
+                gen_topic = st.text_input("🏷️ Topic / Sub-topic",
+                                          placeholder="e.g., SQL Injection Prevention")
 
-        gen_submit = st.form_submit_button("⚡ Generate Questions", use_container_width=True)
+            with gen_cols[1]:
+                gen_difficulty = st.selectbox("🎚️ Difficulty", ["Easy", "Medium", "Hard"], index=1)
+                gen_count = st.slider("📝 Number of Questions", 3, 20, 5)
+
+            gen_submit = st.form_submit_button("⚡ Generate Questions", use_container_width=True)
 
     if gen_submit:
         if not gen_topic:
@@ -115,7 +121,7 @@ with tab_bulk:
 
     # ─── Question Inventory Matrix ────────────────────────────────────────────
     st.markdown("#### 📊 Question Inventory")
-    categories = get_categories()
+    categories = [c for c in get_categories() if c.get("category_id")]
     inventory_data = []
     for cat in categories:
         row = {"Category": f"{cat['icon']} {cat['category_name']}"}
@@ -144,17 +150,21 @@ with tab_bulk:
 
     # ─── Bulk Generation Controls ─────────────────────────────────────────────
     st.markdown("#### ⚡ Generate Batch")
-    with st.form("bulk_gen_form"):
-        bg_cols = st.columns(3)
-        with bg_cols[0]:
-            cat_map_bulk = {c["category_name"]: c["category_id"] for c in categories}
-            bulk_cat = st.selectbox("📚 Category", list(cat_map_bulk.keys()), key="bulk_cat")
-        with bg_cols[1]:
-            bulk_diff = st.selectbox("🎚️ Difficulty", ["Easy", "Medium", "Hard"], key="bulk_diff")
-        with bg_cols[2]:
-            bulk_count = st.slider("📝 Total Questions", 10, 50, 25, step=5, key="bulk_count")
+    if not categories:
+        st.warning("No categories available for bulk generation.")
+        bulk_submit = False
+    else:
+        with st.form("bulk_gen_form"):
+            bg_cols = st.columns(3)
+            with bg_cols[0]:
+                cat_map_bulk = {c["category_name"]: c["category_id"] for c in categories}
+                bulk_cat = st.selectbox("📚 Category", list(cat_map_bulk.keys()), key="bulk_cat")
+            with bg_cols[1]:
+                bulk_diff = st.selectbox("🎚️ Difficulty", ["Easy", "Medium", "Hard"], key="bulk_diff")
+            with bg_cols[2]:
+                bulk_count = st.slider("📝 Total Questions", 10, 50, 25, step=5, key="bulk_count")
 
-        bulk_submit = st.form_submit_button("🚀 Generate Batch", use_container_width=True)
+            bulk_submit = st.form_submit_button("🚀 Generate Batch", use_container_width=True)
 
     if bulk_submit:
         cat_id = cat_map_bulk[bulk_cat]
@@ -182,7 +192,7 @@ with tab_questions:
     # ─── Filters ──────────────────────────────────────────────────────────────
     q_filter_cols = st.columns(3)
     with q_filter_cols[0]:
-        categories = get_categories()
+        categories = [c for c in get_categories() if c.get("category_id")]
         cat_filter_map = {"All": None}
         for c in categories:
             cat_filter_map[c["category_name"]] = c["category_id"]
@@ -227,34 +237,38 @@ with tab_questions:
     # ─── Add Question Manually ────────────────────────────────────────────────
     st.markdown("---")
     st.markdown("#### ➕ Add Question Manually")
-    with st.form("add_q_form"):
-        aq_cols = st.columns(2)
-        with aq_cols[0]:
-            aq_cat = st.selectbox("Category", [c["category_name"] for c in categories], key="aq_cat")
-            aq_text = st.text_area("Question Text", placeholder="Enter the question")
-            aq_diff = st.selectbox("Difficulty", ["Easy", "Medium", "Hard"], key="aq_diff")
-        with aq_cols[1]:
-            aq_o1 = st.text_input("Option 1")
-            aq_o2 = st.text_input("Option 2")
-            aq_o3 = st.text_input("Option 3")
-            aq_o4 = st.text_input("Option 4")
-        aq_ans = st.selectbox("Correct Answer", ["Option 1", "Option 2", "Option 3", "Option 4"])
-        aq_exp = st.text_area("Explanation", placeholder="Why is this the correct answer?")
+    if not categories:
+        st.info("Create at least one category before adding questions.")
+    else:
+        with st.form("add_q_form"):
+            aq_cols = st.columns(2)
+            with aq_cols[0]:
+                aq_cat = st.selectbox("Category", [c["category_name"] for c in categories], key="aq_cat")
+                aq_text = st.text_area("Question Text", placeholder="Enter the question")
+                aq_diff = st.selectbox("Difficulty", ["Easy", "Medium", "Hard"], key="aq_diff")
+            with aq_cols[1]:
+                aq_o1 = st.text_input("Option 1")
+                aq_o2 = st.text_input("Option 2")
+                aq_o3 = st.text_input("Option 3")
+                aq_o4 = st.text_input("Option 4")
+            aq_ans = st.selectbox("Correct Answer", ["Option 1", "Option 2", "Option 3", "Option 4"])
+            aq_exp = st.text_area("Explanation", placeholder="Why is this the correct answer?")
 
-        if st.form_submit_button("➕ Add Question", use_container_width=True):
-            options_vals = [aq_o1, aq_o2, aq_o3, aq_o4]
-            ans_idx = ["Option 1", "Option 2", "Option 3", "Option 4"].index(aq_ans)
-            cat_id = cat_filter_map.get(aq_cat)
-            if not cat_id:
-                cat_id = [c["category_id"] for c in categories if c["category_name"] == aq_cat][0]
+            if st.form_submit_button("➕ Add Question", use_container_width=True):
+                options_vals = [aq_o1, aq_o2, aq_o3, aq_o4]
+                ans_idx = ["Option 1", "Option 2", "Option 3", "Option 4"].index(aq_ans)
+                cat_map = {c["category_name"]: c["category_id"] for c in categories}
+                cat_id = cat_map.get(aq_cat)
 
-            if not aq_text or not all(options_vals):
-                st.error("Please fill in all fields.")
-            else:
-                add_question(cat_id, aq_text, aq_o1, aq_o2, aq_o3, aq_o4,
-                             options_vals[ans_idx], aq_exp, aq_diff)
-                st.success("✅ Question added!")
-                st.rerun()
+                if not cat_id:
+                    st.error("Please select a valid category.")
+                elif not aq_text or not all(options_vals):
+                    st.error("Please fill in all fields.")
+                else:
+                    add_question(cat_id, aq_text, aq_o1, aq_o2, aq_o3, aq_o4,
+                                 options_vals[ans_idx], aq_exp, aq_diff)
+                    st.success("✅ Question added!")
+                    st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3: MANAGE CATEGORIES

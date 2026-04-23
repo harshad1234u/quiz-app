@@ -41,7 +41,7 @@ def init_database():
     print("  4. Paste and click 'Run'")
     print()
     print("  The script will create:")
-    print("    ✓ users, user_interests, categories tables")
+    print("    ✓ users (with selected_topics), categories tables")
     print("    ✓ questions (with JSONB options), quiz_sessions, quiz_answers")
     print("    ✓ RLS policies (open for app-managed auth)")
     print("    ✓ Default categories (8 topics)")

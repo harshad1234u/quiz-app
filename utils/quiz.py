@@ -12,6 +12,7 @@ import os
 import json
 import random
 import logging
+from postgrest.exceptions import APIError
 from utils.db import get_supabase
 from utils.gemini_ai import generate_quiz_questions
 
@@ -23,6 +24,17 @@ _FALLBACK_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "data", "fallback_questions.json"
 )
+
+DEFAULT_CATEGORIES = [
+    {"category_name": "Cybersecurity", "description": "", "icon": "🔒"},
+    {"category_name": "Programming", "description": "", "icon": "💻"},
+    {"category_name": "AI & Machine Learning", "description": "", "icon": "🤖"},
+    {"category_name": "Databases", "description": "", "icon": "🗄️"},
+    {"category_name": "Networking", "description": "", "icon": "🌐"},
+    {"category_name": "General Knowledge", "description": "", "icon": "📖"},
+    {"category_name": "Technology", "description": "", "icon": "⚡"},
+    {"category_name": "Web Development", "description": "", "icon": "🕸️"},
+]
 
 
 def load_fallback_questions(category_name: str = None, difficulty: str = None, count: int = 10) -> list[dict]:
@@ -73,14 +85,66 @@ def _enrich_question(row: dict) -> dict:
             opts = []
     for i in range(4):
         row[f"option{i+1}"] = opts[i] if i < len(opts) else ""
+    _ensure_valid_options(row)
+    return row
+
+
+def _ensure_valid_options(row: dict) -> dict:
+    """Guarantee exactly 4 non-empty display options and a valid correct_answer."""
+    opts = [str(row.get(f"option{i+1}") or "").strip() for i in range(4)]
+
+    if not any(opts):
+        fallback = str(row.get("correct_answer") or "").strip() or "Option A"
+        opts = [fallback, "Option B", "Option C", "Option D"]
+
+    # Fill blanks with deterministic placeholders.
+    for i, opt in enumerate(opts):
+        if not opt:
+            opts[i] = f"Option {chr(65 + i)}"
+
+    # Ensure uniqueness for radio/select widgets.
+    seen = set()
+    for i, opt in enumerate(opts):
+        name = opt
+        suffix = 2
+        while name in seen:
+            name = f"{opt} ({suffix})"
+            suffix += 1
+        opts[i] = name
+        seen.add(name)
+
+    correct = str(row.get("correct_answer") or "").strip()
+    if not correct or correct not in opts:
+        correct = opts[0]
+
+    for i in range(4):
+        row[f"option{i+1}"] = opts[i]
+    row["options"] = opts
+    row["correct_answer"] = correct
     return row
 
 
 # ─── Categories ───────────────────────────────────────────────────────────────
 def get_categories() -> list[dict]:
     sb = get_supabase()
-    result = sb.table("categories").select("*").order("category_name").execute()
-    return result.data
+    try:
+        result = sb.table("categories").select("*").order("category_name").execute()
+        rows = result.data or []
+        if rows:
+            return rows
+
+        # DB is reachable but empty; seed default categories.
+        sb.table("categories").upsert(DEFAULT_CATEGORIES, on_conflict="category_name").execute()
+        seeded = sb.table("categories").select("*").order("category_name").execute()
+        return seeded.data or []
+    except APIError as e:
+        log.warning("Category fetch failed from DB, using defaults: %s", e)
+
+    # Last-resort UI fallback when DB cannot be queried.
+    return [
+        {"category_id": None, **row}
+        for row in DEFAULT_CATEGORIES
+    ]
 
 
 def get_category_by_id(category_id: int) -> dict | None:
@@ -146,13 +210,29 @@ def add_question(category_id: int, question_text: str, option1: str, option2: st
                  difficulty: str = "Medium") -> int:
     """Insert a question. Converts option1..4 → JSONB options array."""
     sb = get_supabase()
-    result = sb.table("questions").insert({
+    payload = {
         "category_id": category_id,
-        "question_text": question_text,
-        "options": [option1, option2, option3, option4],
-        "correct_answer": correct_answer,
-        "explanation": explanation,
+        "question_text": (question_text or "").strip(),
+        "options": [
+            str(option1 or "").strip(),
+            str(option2 or "").strip(),
+            str(option3 or "").strip(),
+            str(option4 or "").strip(),
+        ],
+        "correct_answer": str(correct_answer or "").strip(),
+        "explanation": str(explanation or "").strip(),
         "difficulty": difficulty,
+    }
+
+    _ensure_valid_options(payload)
+
+    result = sb.table("questions").insert({
+        "category_id": payload["category_id"],
+        "question_text": payload["question_text"],
+        "options": payload["options"],
+        "correct_answer": payload["correct_answer"],
+        "explanation": payload["explanation"],
+        "difficulty": payload["difficulty"],
     }).execute()
     return result.data[0]["question_id"] if result.data else None
 
@@ -374,20 +454,34 @@ def bulk_generate_questions(
 
 # ─── Personalized quizzes ────────────────────────────────────────────────────
 def get_recommended_questions(user_id: int, count: int = 10) -> list[dict]:
-    """Fetch questions matching user interests."""
+    """Fetch questions matching users.selected_topics (JSONB)."""
     sb = get_supabase()
 
-    # Get user's interest names
-    interests_result = sb.table("user_interests").select("interest_name").eq("user_id", user_id).execute()
-    interest_names = [r["interest_name"] for r in interests_result.data]
+    user_result = sb.table("users").select("selected_topics").eq("user_id", user_id).limit(1).execute()
+    if not user_result.data:
+        return []
+
+    raw_topics = user_result.data[0].get("selected_topics") or []
+    interest_names = [str(t).strip() for t in raw_topics if str(t).strip()]
     if not interest_names:
         return []
 
-    # Get category IDs matching interests
-    cat_result = sb.table("categories").select("category_id").in_("category_name", interest_names).execute()
-    cat_ids = [r["category_id"] for r in cat_result.data]
+    # Get category IDs matching selected topics (case-insensitive).
+    cat_result = sb.table("categories").select("category_id, category_name").execute()
+    category_rows = cat_result.data or []
+    wanted = {t.lower() for t in interest_names}
+    cat_ids = [r["category_id"] for r in category_rows if str(r.get("category_name", "")).lower() in wanted]
+
+    # If selected_topics contain custom topics not in categories, broaden to all questions.
     if not cat_ids:
-        return []
+        q_result = sb.table("questions").select("*, categories(category_name)").limit(count * 3).execute()
+        rows = q_result.data or []
+        for r in rows:
+            cat = r.pop("categories", None)
+            r["category_name"] = cat["category_name"] if cat else ""
+            _enrich_question(r)
+        random.shuffle(rows)
+        return rows[:count]
 
     # Fetch questions in those categories
     q_result = sb.table("questions").select("*, categories(category_name)").in_("category_id", cat_ids).limit(count * 3).execute()

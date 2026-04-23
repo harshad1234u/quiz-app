@@ -72,7 +72,13 @@ if not st.session_state["quiz_active"] and not st.session_state["quiz_submitted"
 
     with col_setup:
         categories = get_categories()
-        cat_names = {c["category_name"]: c["category_id"] for c in categories}
+        valid_categories = [c for c in categories if c.get("category_id")]
+        cat_names = {c["category_name"]: c["category_id"] for c in valid_categories}
+
+        if not cat_names:
+            st.warning("No categories are available in the database yet.")
+            st.info("Ask an admin to add categories/questions, then refresh this page.")
+            st.stop()
 
         # Pre-select if coming from dashboard
         pre_selected = st.session_state.get("selected_category_name", None)
@@ -217,7 +223,23 @@ elif st.session_state["quiz_active"]:
     """, unsafe_allow_html=True)
 
     # ─── Answer Options ───────────────────────────────────────────────────────
-    options = [q["option1"], q["option2"], q["option3"], q["option4"]]
+    options = [q.get("option1", ""), q.get("option2", ""), q.get("option3", ""), q.get("option4", "")]
+    options = [str(o).strip() for o in options if str(o).strip()]
+    if not options:
+        fallback = str(q.get("correct_answer") or "Option A").strip() or "Option A"
+        options = [fallback, "Option B", "Option C", "Option D"]
+
+    seen = set()
+    normalized_options = []
+    for opt in options[:4]:
+        candidate = opt
+        suffix = 2
+        while candidate in seen:
+            candidate = f"{opt} ({suffix})"
+            suffix += 1
+        seen.add(candidate)
+        normalized_options.append(candidate)
+    options = normalized_options
     q_key = f"q_{q['question_id']}"
     prev_answer = st.session_state["quiz_answers"].get(q["question_id"])
     default_idx = options.index(prev_answer) if prev_answer and prev_answer in options else None

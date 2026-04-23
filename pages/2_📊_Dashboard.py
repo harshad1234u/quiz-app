@@ -61,7 +61,7 @@ col_left, col_right = st.columns([2, 1])
 with col_left:
     st.markdown("### 🚀 Quick Start a Quiz")
 
-    categories = get_categories()
+    categories = [c for c in get_categories() if c.get("category_id")]
     if categories:
         cat_cols = st.columns(min(len(categories), 4))
         for i, cat in enumerate(categories):

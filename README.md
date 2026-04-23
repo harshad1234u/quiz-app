@@ -143,8 +143,7 @@ You need **two values** from your Supabase project:
 
 | Table | Description |
 |---|---|
-| `users` | User accounts (email, hashed password, google_id, role) |
-| `user_interests` | User interest selections |
+| `users` | User accounts (email, hashed password, google_id, role, selected_topics JSONB) |
 | `categories` | Quiz categories with icons |
 | `questions` | MCQs with JSONB `options` array, correct answer, explanation |
 | `quiz_sessions` | Quiz attempt metadata (score, time, difficulty) |

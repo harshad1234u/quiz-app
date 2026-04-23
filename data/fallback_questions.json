@@ -1,0 +1,716 @@
+[
+    {
+        "category": "Cybersecurity",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What does the acronym 'CIA' stand for in cybersecurity?",
+                "option1": "Confidentiality, Integrity, Availability",
+                "option2": "Central Intelligence Agency",
+                "option3": "Computer Internet Access",
+                "option4": "Certified Information Analyst",
+                "correct_answer": "Confidentiality, Integrity, Availability",
+                "explanation": "The CIA triad is a model designed to guide policies for information security within an organization."
+            },
+            {
+                "question_text": "What is a firewall?",
+                "option1": "A network security device that monitors traffic",
+                "option2": "A type of computer virus",
+                "option3": "An encryption algorithm",
+                "option4": "A physical barrier in a data center",
+                "correct_answer": "A network security device that monitors traffic",
+                "explanation": "A firewall monitors and controls incoming and outgoing network traffic based on predetermined security rules."
+            },
+            {
+                "question_text": "What is phishing?",
+                "option1": "A fraudulent attempt to obtain sensitive information",
+                "option2": "A network scanning technique",
+                "option3": "A type of encryption",
+                "option4": "A password storage method",
+                "correct_answer": "A fraudulent attempt to obtain sensitive information",
+                "explanation": "Phishing is a social engineering attack where attackers disguise as trustworthy entities to steal credentials."
+            },
+            {
+                "question_text": "What does 'HTTPS' indicate about a website?",
+                "option1": "The connection is encrypted with SSL/TLS",
+                "option2": "The website is government-approved",
+                "option3": "The website has no viruses",
+                "option4": "The website loads faster",
+                "correct_answer": "The connection is encrypted with SSL/TLS",
+                "explanation": "HTTPS uses SSL/TLS encryption to secure data transmitted between the browser and the web server."
+            },
+            {
+                "question_text": "What is malware?",
+                "option1": "Software designed to cause damage or unauthorized access",
+                "option2": "A type of hardware component",
+                "option3": "A legitimate software update",
+                "option4": "A network protocol",
+                "correct_answer": "Software designed to cause damage or unauthorized access",
+                "explanation": "Malware includes viruses, worms, trojans, and ransomware designed to harm or exploit computer systems."
+            }
+        ]
+    },
+    {
+        "category": "Cybersecurity",
+        "difficulty": "Medium",
+        "questions": [
+            {
+                "question_text": "What is a SQL injection attack?",
+                "option1": "Inserting malicious SQL code into application queries",
+                "option2": "A method to speed up database queries",
+                "option3": "A type of database backup",
+                "option4": "A SQL optimization technique",
+                "correct_answer": "Inserting malicious SQL code into application queries",
+                "explanation": "SQL injection exploits vulnerabilities in input validation to execute unauthorized SQL commands against a database."
+            },
+            {
+                "question_text": "What is the purpose of a VPN?",
+                "option1": "To create a secure encrypted connection over the internet",
+                "option2": "To increase internet speed",
+                "option3": "To store passwords securely",
+                "option4": "To block all incoming traffic",
+                "correct_answer": "To create a secure encrypted connection over the internet",
+                "explanation": "A VPN creates an encrypted tunnel for data transmission, protecting privacy and bypassing geographic restrictions."
+            },
+            {
+                "question_text": "What is two-factor authentication (2FA)?",
+                "option1": "A security method requiring two different verification factors",
+                "option2": "Using two different passwords",
+                "option3": "Logging in from two devices simultaneously",
+                "option4": "A type of encryption algorithm",
+                "correct_answer": "A security method requiring two different verification factors",
+                "explanation": "2FA adds an extra layer of security by requiring something you know (password) and something you have (phone/token)."
+            },
+            {
+                "question_text": "What is a DDoS attack?",
+                "option1": "Overwhelming a server with traffic to make it unavailable",
+                "option2": "Stealing data from a database",
+                "option3": "Infecting computers with ransomware",
+                "option4": "Breaking encryption algorithms",
+                "correct_answer": "Overwhelming a server with traffic to make it unavailable",
+                "explanation": "Distributed Denial of Service attacks use multiple compromised systems to flood a target with traffic."
+            },
+            {
+                "question_text": "What is social engineering in cybersecurity?",
+                "option1": "Manipulating people to reveal confidential information",
+                "option2": "Building secure network architectures",
+                "option3": "Writing secure code",
+                "option4": "Setting up firewalls",
+                "correct_answer": "Manipulating people to reveal confidential information",
+                "explanation": "Social engineering exploits human psychology rather than technical vulnerabilities to gain unauthorized access."
+            }
+        ]
+    },
+    {
+        "category": "Cybersecurity",
+        "difficulty": "Hard",
+        "questions": [
+            {
+                "question_text": "Which technique uses cryptographic hashing to verify file integrity?",
+                "option1": "Checksum verification",
+                "option2": "Symmetric encryption",
+                "option3": "Port scanning",
+                "option4": "Packet sniffing",
+                "correct_answer": "Checksum verification",
+                "explanation": "Checksum verification uses hash functions like SHA-256 to create a unique fingerprint of a file for integrity checking."
+            },
+            {
+                "question_text": "What is a zero-day vulnerability?",
+                "option1": "A security flaw unknown to the software vendor",
+                "option2": "A vulnerability that has been patched",
+                "option3": "A virus that deletes files at midnight",
+                "option4": "A network with zero security measures",
+                "correct_answer": "A security flaw unknown to the software vendor",
+                "explanation": "Zero-day vulnerabilities are unknown to the vendor and have no available patch, making them extremely dangerous."
+            },
+            {
+                "question_text": "What is the OWASP Top 10?",
+                "option1": "A list of the most critical web application security risks",
+                "option2": "The top 10 antivirus software programs",
+                "option3": "A ranking of the most secure programming languages",
+                "option4": "A list of the 10 most common network protocols",
+                "correct_answer": "A list of the most critical web application security risks",
+                "explanation": "OWASP Top 10 is a standard awareness document for web application security, listing the most critical risks."
+            },
+            {
+                "question_text": "What is the purpose of penetration testing?",
+                "option1": "To simulate attacks and identify vulnerabilities before attackers do",
+                "option2": "To install security patches",
+                "option3": "To monitor network traffic",
+                "option4": "To train employees on password policies",
+                "correct_answer": "To simulate attacks and identify vulnerabilities before attackers do",
+                "explanation": "Penetration testing proactively identifies security weaknesses by simulating real-world attack scenarios."
+            },
+            {
+                "question_text": "In encryption, what is the difference between symmetric and asymmetric?",
+                "option1": "Symmetric uses one key, asymmetric uses a key pair",
+                "option2": "Symmetric is slower than asymmetric",
+                "option3": "Asymmetric uses only private keys",
+                "option4": "There is no practical difference",
+                "correct_answer": "Symmetric uses one key, asymmetric uses a key pair",
+                "explanation": "Symmetric encryption uses the same key for encryption and decryption, while asymmetric uses a public-private key pair."
+            }
+        ]
+    },
+    {
+        "category": "Programming",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What does HTML stand for?",
+                "option1": "HyperText Markup Language",
+                "option2": "High Technical Modern Language",
+                "option3": "Home Tool Markup Language",
+                "option4": "Hyperlink Text Management Language",
+                "correct_answer": "HyperText Markup Language",
+                "explanation": "HTML is the standard markup language for creating web pages and web applications."
+            },
+            {
+                "question_text": "Which data type stores true or false values?",
+                "option1": "Boolean",
+                "option2": "Integer",
+                "option3": "String",
+                "option4": "Float",
+                "correct_answer": "Boolean",
+                "explanation": "Boolean is a data type that can only hold two values: true or false."
+            },
+            {
+                "question_text": "What is a variable in programming?",
+                "option1": "A named container that stores a value",
+                "option2": "A type of programming language",
+                "option3": "A function that performs calculations",
+                "option4": "A hardware component",
+                "correct_answer": "A named container that stores a value",
+                "explanation": "Variables are used to store data that can be referenced and manipulated throughout a program."
+            },
+            {
+                "question_text": "What does the 'print' function do in Python?",
+                "option1": "Displays output to the screen",
+                "option2": "Sends a document to a printer",
+                "option3": "Creates a new variable",
+                "option4": "Reads user input",
+                "correct_answer": "Displays output to the screen",
+                "explanation": "The print() function in Python outputs text or variable values to the console."
+            },
+            {
+                "question_text": "What is a loop in programming?",
+                "option1": "A structure that repeats a block of code",
+                "option2": "A type of variable",
+                "option3": "A way to store data",
+                "option4": "A method to connect to the internet",
+                "correct_answer": "A structure that repeats a block of code",
+                "explanation": "Loops like for and while repeat code execution until a specified condition is met."
+            }
+        ]
+    },
+    {
+        "category": "Programming",
+        "difficulty": "Medium",
+        "questions": [
+            {
+                "question_text": "What is the time complexity of a binary search algorithm?",
+                "option1": "O(log n)",
+                "option2": "O(n)",
+                "option3": "O(n^2)",
+                "option4": "O(1)",
+                "correct_answer": "O(log n)",
+                "explanation": "Binary search divides the search interval in half each time, resulting in logarithmic time complexity."
+            },
+            {
+                "question_text": "What is the difference between a list and a tuple in Python?",
+                "option1": "Lists are mutable, tuples are immutable",
+                "option2": "Tuples are faster than lists",
+                "option3": "Lists can only store numbers",
+                "option4": "There is no difference",
+                "correct_answer": "Lists are mutable, tuples are immutable",
+                "explanation": "Lists can be modified after creation while tuples cannot, making tuples useful for constant data."
+            },
+            {
+                "question_text": "What is an API?",
+                "option1": "Application Programming Interface",
+                "option2": "Advanced Program Installation",
+                "option3": "Automated Process Integration",
+                "option4": "Application Process Identifier",
+                "correct_answer": "Application Programming Interface",
+                "explanation": "An API defines how different software components should interact and communicate with each other."
+            },
+            {
+                "question_text": "What is recursion?",
+                "option1": "A function that calls itself",
+                "option2": "A loop that runs forever",
+                "option3": "A type of data structure",
+                "option4": "An error handling technique",
+                "correct_answer": "A function that calls itself",
+                "explanation": "Recursion is a technique where a function calls itself with a modified parameter until reaching a base case."
+            },
+            {
+                "question_text": "What is the purpose of version control systems like Git?",
+                "option1": "To track changes and collaborate on code",
+                "option2": "To compile source code",
+                "option3": "To design user interfaces",
+                "option4": "To test application performance",
+                "correct_answer": "To track changes and collaborate on code",
+                "explanation": "Git tracks file changes over time, enabling collaboration, branching, and reverting to previous versions."
+            }
+        ]
+    },
+    {
+        "category": "Programming",
+        "difficulty": "Hard",
+        "questions": [
+            {
+                "question_text": "What is the difference between concurrency and parallelism?",
+                "option1": "Concurrency is about managing multiple tasks; parallelism is about executing them simultaneously",
+                "option2": "They are the same concept",
+                "option3": "Parallelism is slower than concurrency",
+                "option4": "Concurrency requires multiple CPUs",
+                "correct_answer": "Concurrency is about managing multiple tasks; parallelism is about executing them simultaneously",
+                "explanation": "Concurrency deals with managing multiple tasks that may not run at the same time, while parallelism truly executes tasks simultaneously."
+            },
+            {
+                "question_text": "What is a deadlock in multithreading?",
+                "option1": "When two or more threads are waiting for each other indefinitely",
+                "option2": "When a thread runs too slowly",
+                "option3": "When memory runs out",
+                "option4": "When a program crashes due to a bug",
+                "correct_answer": "When two or more threads are waiting for each other indefinitely",
+                "explanation": "A deadlock occurs when threads hold resources that other threads need, creating a circular wait condition."
+            },
+            {
+                "question_text": "What design pattern ensures a class has only one instance?",
+                "option1": "Singleton",
+                "option2": "Factory",
+                "option3": "Observer",
+                "option4": "Decorator",
+                "correct_answer": "Singleton",
+                "explanation": "The Singleton pattern restricts instantiation of a class to a single instance, providing global access to it."
+            },
+            {
+                "question_text": "What is Big-O notation used for?",
+                "option1": "Describing the worst-case performance of an algorithm",
+                "option2": "Measuring the size of a program",
+                "option3": "Counting the number of functions",
+                "option4": "Determining memory allocation",
+                "correct_answer": "Describing the worst-case performance of an algorithm",
+                "explanation": "Big-O notation expresses the upper bound of an algorithm's time or space complexity as input size grows."
+            },
+            {
+                "question_text": "What is dependency injection?",
+                "option1": "A technique where objects receive their dependencies from external sources",
+                "option2": "Installing software dependencies",
+                "option3": "A type of code compilation",
+                "option4": "Importing libraries in Python",
+                "correct_answer": "A technique where objects receive their dependencies from external sources",
+                "explanation": "Dependency injection decouples object creation from usage, improving testability and maintainability."
+            }
+        ]
+    },
+    {
+        "category": "AI & Machine Learning",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What is Artificial Intelligence?",
+                "option1": "Simulation of human intelligence by machines",
+                "option2": "A programming language",
+                "option3": "A type of database",
+                "option4": "A hardware component",
+                "correct_answer": "Simulation of human intelligence by machines",
+                "explanation": "AI involves creating systems that can perform tasks that typically require human intelligence."
+            },
+            {
+                "question_text": "What is Machine Learning?",
+                "option1": "A subset of AI that learns from data",
+                "option2": "A database management system",
+                "option3": "A network protocol",
+                "option4": "An operating system",
+                "correct_answer": "A subset of AI that learns from data",
+                "explanation": "Machine Learning enables computers to learn patterns from data without being explicitly programmed."
+            },
+            {
+                "question_text": "What is a neural network inspired by?",
+                "option1": "The human brain",
+                "option2": "Computer networks",
+                "option3": "Electrical circuits",
+                "option4": "The internet",
+                "correct_answer": "The human brain",
+                "explanation": "Neural networks are computational models inspired by the structure and function of biological neural networks."
+            },
+            {
+                "question_text": "What is supervised learning?",
+                "option1": "Training a model with labeled input-output pairs",
+                "option2": "Learning without any data",
+                "option3": "A type of unsupervised clustering",
+                "option4": "Training a model with unlabeled data",
+                "correct_answer": "Training a model with labeled input-output pairs",
+                "explanation": "Supervised learning uses labeled training data to learn a mapping from inputs to correct outputs."
+            },
+            {
+                "question_text": "What is a dataset in machine learning?",
+                "option1": "A collection of data used for training or testing models",
+                "option2": "A type of algorithm",
+                "option3": "A programming framework",
+                "option4": "A hardware accelerator",
+                "correct_answer": "A collection of data used for training or testing models",
+                "explanation": "Datasets provide the examples that ML models learn from during the training process."
+            }
+        ]
+    },
+    {
+        "category": "AI & Machine Learning",
+        "difficulty": "Medium",
+        "questions": [
+            {
+                "question_text": "What is overfitting in machine learning?",
+                "option1": "When a model performs well on training data but poorly on new data",
+                "option2": "When a model is too simple",
+                "option3": "When training data is insufficient",
+                "option4": "When the algorithm runs too slowly",
+                "correct_answer": "When a model performs well on training data but poorly on new data",
+                "explanation": "Overfitting occurs when a model memorizes training data patterns including noise, reducing generalization ability."
+            },
+            {
+                "question_text": "What is the purpose of a validation set?",
+                "option1": "To tune hyperparameters and prevent overfitting",
+                "option2": "To train the model",
+                "option3": "To deploy the model",
+                "option4": "To collect new data",
+                "correct_answer": "To tune hyperparameters and prevent overfitting",
+                "explanation": "The validation set provides an unbiased evaluation of the model during training to guide hyperparameter tuning."
+            },
+            {
+                "question_text": "What is Natural Language Processing (NLP)?",
+                "option1": "AI that helps computers understand human language",
+                "option2": "A type of neural network architecture",
+                "option3": "A programming language for AI",
+                "option4": "A method for image recognition",
+                "correct_answer": "AI that helps computers understand human language",
+                "explanation": "NLP enables machines to read, understand, and derive meaning from human languages."
+            },
+            {
+                "question_text": "What is a convolutional neural network (CNN) primarily used for?",
+                "option1": "Image recognition and computer vision",
+                "option2": "Text generation",
+                "option3": "Audio processing only",
+                "option4": "Database management",
+                "correct_answer": "Image recognition and computer vision",
+                "explanation": "CNNs use convolutional layers to detect patterns in images, making them ideal for visual recognition tasks."
+            },
+            {
+                "question_text": "What is transfer learning?",
+                "option1": "Using a pre-trained model as a starting point for a new task",
+                "option2": "Moving data between databases",
+                "option3": "Converting one programming language to another",
+                "option4": "Sharing model weights across networks",
+                "correct_answer": "Using a pre-trained model as a starting point for a new task",
+                "explanation": "Transfer learning leverages knowledge from a model trained on a large dataset to improve performance on a different but related task."
+            }
+        ]
+    },
+    {
+        "category": "Databases",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What does SQL stand for?",
+                "option1": "Structured Query Language",
+                "option2": "Simple Question Language",
+                "option3": "System Query Logic",
+                "option4": "Standard Quick Language",
+                "correct_answer": "Structured Query Language",
+                "explanation": "SQL is the standard language for managing and manipulating relational databases."
+            },
+            {
+                "question_text": "What is a primary key?",
+                "option1": "A unique identifier for each record in a table",
+                "option2": "The first column in a table",
+                "option3": "A password for the database",
+                "option4": "A type of database index",
+                "correct_answer": "A unique identifier for each record in a table",
+                "explanation": "A primary key uniquely identifies each row in a database table and cannot contain NULL values."
+            },
+            {
+                "question_text": "What SQL command is used to retrieve data?",
+                "option1": "SELECT",
+                "option2": "INSERT",
+                "option3": "UPDATE",
+                "option4": "DELETE",
+                "correct_answer": "SELECT",
+                "explanation": "The SELECT statement is used to query and retrieve data from one or more tables."
+            },
+            {
+                "question_text": "What is a database table?",
+                "option1": "A structured collection of data organized in rows and columns",
+                "option2": "A file on the hard drive",
+                "option3": "A type of spreadsheet",
+                "option4": "A backup of the database",
+                "correct_answer": "A structured collection of data organized in rows and columns",
+                "explanation": "Tables are the fundamental building blocks of relational databases, organizing data into a structured format."
+            },
+            {
+                "question_text": "What does CRUD stand for?",
+                "option1": "Create, Read, Update, Delete",
+                "option2": "Copy, Remove, Update, Download",
+                "option3": "Create, Run, Upload, Debug",
+                "option4": "Check, Read, Undo, Deploy",
+                "correct_answer": "Create, Read, Update, Delete",
+                "explanation": "CRUD represents the four basic operations performed on database records."
+            }
+        ]
+    },
+    {
+        "category": "Databases",
+        "difficulty": "Medium",
+        "questions": [
+            {
+                "question_text": "What is database normalization?",
+                "option1": "Organizing data to reduce redundancy and dependency",
+                "option2": "Making a database run faster",
+                "option3": "Backing up the database",
+                "option4": "Converting data to a standard format",
+                "correct_answer": "Organizing data to reduce redundancy and dependency",
+                "explanation": "Normalization organizes database tables to minimize data redundancy and improve data integrity."
+            },
+            {
+                "question_text": "What is a foreign key?",
+                "option1": "A field that references the primary key of another table",
+                "option2": "A key from a different database",
+                "option3": "An encrypted primary key",
+                "option4": "A key that allows remote access",
+                "correct_answer": "A field that references the primary key of another table",
+                "explanation": "Foreign keys establish relationships between tables by referencing the primary key of a related table."
+            },
+            {
+                "question_text": "What is an index in a database?",
+                "option1": "A data structure that improves query speed",
+                "option2": "A list of all tables",
+                "option3": "A type of primary key",
+                "option4": "A backup method",
+                "correct_answer": "A data structure that improves query speed",
+                "explanation": "Indexes create a sorted reference to data, allowing the database engine to find rows much faster."
+            },
+            {
+                "question_text": "What is a JOIN operation in SQL?",
+                "option1": "Combining rows from two or more tables based on related columns",
+                "option2": "Merging two databases",
+                "option3": "Adding a new column to a table",
+                "option4": "Connecting to a remote server",
+                "correct_answer": "Combining rows from two or more tables based on related columns",
+                "explanation": "JOIN clauses combine rows from multiple tables based on related columns between them."
+            },
+            {
+                "question_text": "What is a transaction in databases?",
+                "option1": "A unit of work that is either fully completed or fully rolled back",
+                "option2": "A payment processing system",
+                "option3": "A data transfer between tables",
+                "option4": "A log of all database queries",
+                "correct_answer": "A unit of work that is either fully completed or fully rolled back",
+                "explanation": "Transactions ensure data integrity by grouping operations that must all succeed or all fail (ACID properties)."
+            }
+        ]
+    },
+    {
+        "category": "General Knowledge",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What is the largest planet in our solar system?",
+                "option1": "Jupiter",
+                "option2": "Saturn",
+                "option3": "Earth",
+                "option4": "Mars",
+                "correct_answer": "Jupiter",
+                "explanation": "Jupiter is the largest planet in the solar system with a mass more than twice that of all other planets combined."
+            },
+            {
+                "question_text": "What is the chemical symbol for water?",
+                "option1": "H2O",
+                "option2": "CO2",
+                "option3": "NaCl",
+                "option4": "O2",
+                "correct_answer": "H2O",
+                "explanation": "Water is composed of two hydrogen atoms and one oxygen atom, represented as H2O."
+            },
+            {
+                "question_text": "How many continents are there on Earth?",
+                "option1": "7",
+                "option2": "5",
+                "option3": "6",
+                "option4": "8",
+                "correct_answer": "7",
+                "explanation": "The seven continents are Asia, Africa, North America, South America, Antarctica, Europe, and Australia."
+            },
+            {
+                "question_text": "What is the speed of light approximately?",
+                "option1": "300,000 km/s",
+                "option2": "150,000 km/s",
+                "option3": "500,000 km/s",
+                "option4": "100,000 km/s",
+                "correct_answer": "300,000 km/s",
+                "explanation": "Light travels at approximately 299,792 km/s in a vacuum, often rounded to 300,000 km/s."
+            },
+            {
+                "question_text": "Who wrote 'Romeo and Juliet'?",
+                "option1": "William Shakespeare",
+                "option2": "Charles Dickens",
+                "option3": "Mark Twain",
+                "option4": "Jane Austen",
+                "correct_answer": "William Shakespeare",
+                "explanation": "Romeo and Juliet is a tragedy written by William Shakespeare around 1594-1596."
+            }
+        ]
+    },
+    {
+        "category": "Networking",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What does IP stand for in networking?",
+                "option1": "Internet Protocol",
+                "option2": "Internal Process",
+                "option3": "Information Provider",
+                "option4": "Integrated Platform",
+                "correct_answer": "Internet Protocol",
+                "explanation": "IP is the principal communications protocol for relaying datagrams across network boundaries."
+            },
+            {
+                "question_text": "What is a router?",
+                "option1": "A device that forwards data packets between computer networks",
+                "option2": "A type of cable",
+                "option3": "A software application",
+                "option4": "A type of server",
+                "correct_answer": "A device that forwards data packets between computer networks",
+                "explanation": "Routers connect multiple networks and direct traffic between them using routing tables."
+            },
+            {
+                "question_text": "What is DNS?",
+                "option1": "Domain Name System - translates domain names to IP addresses",
+                "option2": "Data Network Security",
+                "option3": "Digital Network Service",
+                "option4": "Dynamic Node System",
+                "correct_answer": "Domain Name System - translates domain names to IP addresses",
+                "explanation": "DNS acts as the internet's phone book, converting human-readable domain names into IP addresses."
+            },
+            {
+                "question_text": "What does LAN stand for?",
+                "option1": "Local Area Network",
+                "option2": "Large Access Node",
+                "option3": "Linked Application Network",
+                "option4": "Long Access Network",
+                "correct_answer": "Local Area Network",
+                "explanation": "A LAN is a computer network that interconnects computers within a limited area such as a home or office."
+            },
+            {
+                "question_text": "What port does HTTP use by default?",
+                "option1": "80",
+                "option2": "443",
+                "option3": "21",
+                "option4": "25",
+                "correct_answer": "80",
+                "explanation": "HTTP uses port 80 by default, while HTTPS uses port 443."
+            }
+        ]
+    },
+    {
+        "category": "Technology",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What does CPU stand for?",
+                "option1": "Central Processing Unit",
+                "option2": "Computer Personal Unit",
+                "option3": "Central Program Utility",
+                "option4": "Core Processing Utility",
+                "correct_answer": "Central Processing Unit",
+                "explanation": "The CPU is the primary component that executes instructions and processes data in a computer."
+            },
+            {
+                "question_text": "What is cloud computing?",
+                "option1": "Delivering computing services over the internet",
+                "option2": "Computing in rainy weather",
+                "option3": "A type of local storage",
+                "option4": "A new programming language",
+                "correct_answer": "Delivering computing services over the internet",
+                "explanation": "Cloud computing provides on-demand access to computing resources like servers, storage, and databases over the internet."
+            },
+            {
+                "question_text": "What is RAM?",
+                "option1": "Random Access Memory - temporary high-speed storage",
+                "option2": "Read Access Module",
+                "option3": "Remote Application Manager",
+                "option4": "Real-time Action Memory",
+                "correct_answer": "Random Access Memory - temporary high-speed storage",
+                "explanation": "RAM provides fast, temporary storage that the CPU uses to hold data it is actively working with."
+            },
+            {
+                "question_text": "What is an operating system?",
+                "option1": "Software that manages computer hardware and software resources",
+                "option2": "A web browser",
+                "option3": "A type of programming language",
+                "option4": "A network device",
+                "correct_answer": "Software that manages computer hardware and software resources",
+                "explanation": "Operating systems like Windows, macOS, and Linux manage hardware resources and provide services for applications."
+            },
+            {
+                "question_text": "What is SSD?",
+                "option1": "Solid State Drive - a faster type of storage device",
+                "option2": "System Software Driver",
+                "option3": "Secure Socket Domain",
+                "option4": "Standard Storage Device",
+                "correct_answer": "Solid State Drive - a faster type of storage device",
+                "explanation": "SSDs use flash memory to store data, offering faster read/write speeds compared to traditional hard disk drives."
+            }
+        ]
+    },
+    {
+        "category": "Web Development",
+        "difficulty": "Easy",
+        "questions": [
+            {
+                "question_text": "What is CSS used for?",
+                "option1": "Styling and formatting web pages",
+                "option2": "Managing databases",
+                "option3": "Server-side scripting",
+                "option4": "Creating computer networks",
+                "correct_answer": "Styling and formatting web pages",
+                "explanation": "CSS (Cascading Style Sheets) controls the visual presentation of HTML elements on web pages."
+            },
+            {
+                "question_text": "What is JavaScript primarily used for in web development?",
+                "option1": "Adding interactivity and dynamic behavior to web pages",
+                "option2": "Styling web pages",
+                "option3": "Creating database schemas",
+                "option4": "Managing web servers",
+                "correct_answer": "Adding interactivity and dynamic behavior to web pages",
+                "explanation": "JavaScript enables dynamic content, interactive forms, animations, and real-time updates on web pages."
+            },
+            {
+                "question_text": "What is a web browser?",
+                "option1": "Software that displays web pages and enables internet navigation",
+                "option2": "A web server",
+                "option3": "A programming language",
+                "option4": "A network router",
+                "correct_answer": "Software that displays web pages and enables internet navigation",
+                "explanation": "Web browsers like Chrome, Firefox, and Safari interpret HTML, CSS, and JavaScript to render web pages."
+            },
+            {
+                "question_text": "What does URL stand for?",
+                "option1": "Uniform Resource Locator",
+                "option2": "Universal Reference Link",
+                "option3": "Unified Resource Language",
+                "option4": "User Request Location",
+                "correct_answer": "Uniform Resource Locator",
+                "explanation": "A URL is the address of a resource on the internet, specifying the protocol, domain, and path."
+            },
+            {
+                "question_text": "What is responsive web design?",
+                "option1": "Designing websites that work well on all screen sizes",
+                "option2": "Making websites load faster",
+                "option3": "Adding security to websites",
+                "option4": "Creating websites that respond to voice commands",
+                "correct_answer": "Designing websites that work well on all screen sizes",
+                "explanation": "Responsive design uses flexible layouts, images, and CSS media queries to adapt to different screen sizes."
+            }
+        ]
+    }
+]

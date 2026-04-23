@@ -4,6 +4,7 @@ Uses Supabase (PostgREST) for all database operations.
 """
 import bcrypt
 import streamlit as st
+from postgrest.exceptions import APIError
 from utils.db import get_supabase
 
 # ─── Available interest topics ───────────────────────────────────────────────
@@ -28,25 +29,71 @@ def _verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
 
+def _api_error_message(exc: APIError) -> str:
+    """Extract a readable message from a PostgREST exception."""
+    try:
+        payload = exc.json() if callable(getattr(exc, "json", None)) else {}
+    except Exception:
+        payload = {}
+
+    if isinstance(payload, dict):
+        return str(payload.get("message") or payload.get("details") or payload.get("hint") or "")
+    return ""
+
+
 # ─── Registration ─────────────────────────────────────────────────────────────
 def register_user(name: str, email: str, password: str, interests: list[str] | None = None) -> dict:
     """Register a new user. Returns {'success': bool, 'message': str, 'user': dict|None}."""
     sb = get_supabase()
+    email = email.strip().lower()
 
-    # Check if email exists
-    existing = sb.table("users").select("user_id").eq("email", email).execute()
-    if existing.data:
-        return {"success": False, "message": "An account with this email already exists.", "user": None}
+    try:
+        # Check if email exists (case-insensitive)
+        existing = sb.table("users").select("user_id").ilike("email", email).limit(1).execute()
+        if existing.data:
+            return {"success": False, "message": "An account with this email already exists.", "user": None}
+    except APIError:
+        # Fallback for environments where ilike may not be available through API permissions.
+        existing = sb.table("users").select("user_id").eq("email", email).limit(1).execute()
+        if existing.data:
+            return {"success": False, "message": "An account with this email already exists.", "user": None}
 
     hashed = _hash_password(password)
-    result = sb.table("users").insert({
-        "name": name,
-        "email": email,
-        "password": hashed,
-        "role": "user"
-    }).execute()
+
+    # Try a few payload shapes to tolerate minor schema drift across deployments.
+    insert_payloads = [
+        {"name": name, "email": email, "password": hashed, "role": "user"},
+        {"name": name, "email": email, "password": hashed},
+        {"username": name, "email": email, "password": hashed, "role": "user"},
+        {"username": name, "email": email, "password": hashed},
+    ]
+
+    result = None
+    last_error: APIError | None = None
+    for payload in insert_payloads:
+        try:
+            result = sb.table("users").insert(payload).execute()
+            break
+        except APIError as exc:
+            last_error = exc
+
+    if result is None:
+        details = _api_error_message(last_error) if last_error else ""
+        if "duplicate" in details.lower() or "unique" in details.lower():
+            return {"success": False, "message": "An account with this email already exists.", "user": None}
+        if details:
+            return {"success": False, "message": f"Registration failed: {details}", "user": None}
+        return {"success": False, "message": "Registration failed. Please verify your Supabase users table schema.", "user": None}
 
     user = result.data[0] if result.data else None
+    if not user:
+        try:
+            refreshed = sb.table("users").select("*").ilike("email", email).limit(1).execute()
+            user = refreshed.data[0] if refreshed.data else None
+        except APIError:
+            refreshed = sb.table("users").select("*").eq("email", email).limit(1).execute()
+            user = refreshed.data[0] if refreshed.data else None
+
     if not user:
         return {"success": False, "message": "Registration failed.", "user": None}
 
@@ -55,7 +102,11 @@ def register_user(name: str, email: str, password: str, interests: list[str] | N
     # Save interests
     if interests:
         rows = [{"user_id": user_id, "interest_name": i} for i in interests]
-        sb.table("user_interests").upsert(rows, on_conflict="user_id,interest_name").execute()
+        try:
+            sb.table("user_interests").upsert(rows, on_conflict="user_id,interest_name").execute()
+        except APIError:
+            # Keep auth flow working even if interests table/policy differs.
+            pass
 
     return {"success": True, "message": "Registration successful!", "user": user}
 
@@ -129,7 +180,7 @@ def set_session_user(user: dict):
     st.session_state["logged_in"] = True
     st.session_state["user_id"] = user["user_id"]
     st.session_state["user_name"] = user["name"]
-    st.session_state["user_role"] = user["role"]
+    st.session_state["user_role"] = user.get("role", "user")
 
 
 def get_session_user() -> dict | None:

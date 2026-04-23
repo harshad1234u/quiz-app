@@ -1,4 +1,4 @@
-﻿"""
+"""
 Login and registration page.
 """
 import os
@@ -42,6 +42,12 @@ def _render_sidebar() -> None:
             if st.button("Logout", use_container_width=True, key="auth_sidebar_logout"):
                 logout()
                 st.rerun()
+
+
+def _render_inline_error(message: str) -> None:
+    if not message:
+        return
+    st.markdown(f"<p class='inline-error'>{message}</p>", unsafe_allow_html=True)
 
 
 def _render_google_section() -> None:
@@ -108,202 +114,184 @@ def _render_google_section() -> None:
         db_user = google_oauth_upsert(
             google_id=guser.get("id"),
             name=guser.get("name", "Google User"),
-
-
-        def _render_inline_error(message: str) -> None:
-            if not message:
-                return
-            st.markdown(f"<p class='inline-error'>{message}</p>", unsafe_allow_html=True)
             email=guser.get("email"),
             avatar_url=guser.get("picture"),
         )
-            errors = st.session_state.get("login_errors", {})
 
-
-                st.markdown("### Welcome back")
-                st.caption("Use your account to continue your learning journey.")
-
-                email = st.text_input("Email", key="login_email", placeholder="you@example.com")
-                _render_inline_error(errors.get("email", ""))
-
-                show_password = st.toggle("Show password", key="login_show_password")
-                password = st.text_input(
-                    "Password",
-                    key="login_password",
-                    type="default" if show_password else "password",
-                    placeholder="Enter your password",
-                )
-                _render_inline_error(errors.get("password", ""))
-                _render_inline_error(errors.get("form", ""))
-
+        if not db_user:
+            st.error("Failed to create your account. Please try again.")
+            return
 
         set_session_user(db_user)
         st.query_params.clear()
-                form_errors = {}
-                email = email.strip()
-
-                if not email:
-                    form_errors["email"] = "Email is required."
-                elif "@" not in email:
-                    form_errors["email"] = "Enter a valid email address."
-
-                if not password:
-                    form_errors["password"] = "Password is required."
-
-                if form_errors:
-                    st.session_state["login_errors"] = form_errors
-                    status_slot.empty()
-                    st.rerun()
-
-                with st.spinner("Signing you in..."):
-                    result = login_user(email, password)
-
-                if result["success"]:
-                    st.session_state["login_errors"] = {}
-                    set_session_user(result["user"])
-                    status_slot.success("Login successful. Redirecting...")
-                    st.rerun()
-
-                st.session_state["login_errors"] = {"form": result["message"]}
-                status_slot.empty()
-                st.rerun()
-
-            st.markdown(
-                "<p class='soft-note auth-default-note'>Default admin login: <b>admin@quizapp.com</b> / <b>admin123</b></p>",
-                unsafe_allow_html=True,
-            )
+        st.success("Signed in with Google.")
+        st.rerun()
+    except Exception as exc:
+        st.error(f"Google sign-in error: {exc}")
 
 
-        def _render_register_form(status_slot) -> None:
-            errors = st.session_state.get("register_errors", {})
+def _render_login_form(status_slot) -> None:
+    errors = st.session_state.get("login_errors", {})
 
-            with st.form("register_form", clear_on_submit=False):
-                st.markdown("### Create account")
-                st.caption("Set up your profile to unlock personalized quizzes.")
+    with st.form("login_form", clear_on_submit=False):
+        st.markdown("### Welcome back")
+        st.caption("Use your account to continue your learning journey.")
 
-                reg_name = st.text_input("Full Name", key="register_name", placeholder="John Doe")
-                _render_inline_error(errors.get("name", ""))
+        email = st.text_input("Email", key="login_email", placeholder="you@example.com")
+        _render_inline_error(errors.get("email", ""))
 
-                reg_email = st.text_input("Email", key="register_email", placeholder="you@example.com")
-                _render_inline_error(errors.get("email", ""))
+        show_password = st.toggle("Show password", key="login_show_password")
+        password = st.text_input(
+            "Password",
+            key="login_password",
+            type="default" if show_password else "password",
+            placeholder="Enter your password",
+        )
+        _render_inline_error(errors.get("password", ""))
+        _render_inline_error(errors.get("form", ""))
 
-                show_passwords = st.toggle("Show passwords", key="register_show_passwords")
-                reg_password = st.text_input(
-                    "Password",
-                    key="register_password",
-                    type="default" if show_passwords else "password",
-                    placeholder="Minimum 6 characters",
-                )
-                _render_inline_error(errors.get("password", ""))
+        login_click = st.form_submit_button("Login", use_container_width=True)
 
-                reg_confirm = st.text_input(
-                    "Confirm Password",
-                    key="register_confirm",
-                    type="default" if show_passwords else "password",
-                    placeholder="Re-enter password",
-                )
-                _render_inline_error(errors.get("confirm", ""))
+    if login_click:
+        form_errors = {}
+        email = email.strip()
 
-                st.caption("Select interests for personalized quizzes")
-                selected_interests = st.multiselect(
-                    "Interests",
-                    options=INTEREST_OPTIONS,
-                    default=[],
-                    placeholder="Choose one or more topics",
-                    key="register_interests",
-                )
-                custom_interest = st.text_input(
-                    "Custom Interest (optional)",
-                    key="register_custom_interest",
-                    placeholder="e.g., Cloud Computing",
-                )
-                _render_inline_error(errors.get("form", ""))
+        if not email:
+            form_errors["email"] = "Email is required."
+        elif "@" not in email:
+            form_errors["email"] = "Enter a valid email address."
 
-                register_click = st.form_submit_button("Create Account", use_container_width=True)
+        if not password:
+            form_errors["password"] = "Password is required."
 
-            if register_click:
-                form_errors = {}
-                reg_name = reg_name.strip()
-                reg_email = reg_email.strip()
+        if form_errors:
+            st.session_state["login_errors"] = form_errors
+            status_slot.empty()
+            st.rerun()
 
-                if not reg_name:
-                    form_errors["name"] = "Full name is required."
+        with st.spinner("Signing you in..."):
+            result = login_user(email, password)
 
-                if not reg_email:
-                    form_errors["email"] = "Email is required."
-                elif "@" not in reg_email:
-                    form_errors["email"] = "Enter a valid email address."
+        if result["success"]:
+            st.session_state["login_errors"] = {}
+            st.session_state["register_errors"] = {}
+            set_session_user(result["user"])
+            status_slot.success("Login successful. Redirecting...")
+            st.rerun()
 
-                if not reg_password:
-                    form_errors["password"] = "Password is required."
-                elif len(reg_password) < 6:
-                    form_errors["password"] = "Password must be at least 6 characters."
+        st.session_state["login_errors"] = {"form": result["message"]}
+        status_slot.empty()
+        st.rerun()
 
-                if reg_password != reg_confirm:
-                    form_errors["confirm"] = "Passwords do not match."
-
-                if form_errors:
-                    st.session_state["register_errors"] = form_errors
-                    status_slot.empty()
-                    st.rerun()
-
-                interests = selected_interests[:]
-                if custom_interest.strip():
-                    interests.append(custom_interest.strip())
-
-                with st.spinner("Creating your account..."):
-                    result = register_user(reg_name, reg_email, reg_password, interests)
-
-                if result["success"]:
-                    st.session_state["register_errors"] = {}
-                    set_session_user(result["user"])
-                    status_slot.success("Account created successfully. Redirecting...")
-                    st.rerun()
-
-                st.session_state["register_errors"] = {"form": result["message"]}
-                status_slot.empty()
-                st.rerun()
+    st.markdown(
+        "<p class='soft-note auth-default-note'>Default admin login: <b>admin@quizapp.com</b> / <b>admin123</b></p>",
+        unsafe_allow_html=True,
+    )
 
 
-        def _render_footer_switch(mode: str) -> None:
-            if mode == "Login":
-                st.markdown(
-                    "<p class='auth-switch-copy'>Don&#39;t have an account? <a href='?auth=register' target='_self'>Register</a></p>",
-                    unsafe_allow_html=True,
-                )
-            else:
-                st.markdown(
-                    "<p class='auth-switch-copy'>Already have an account? <a href='?auth=login' target='_self'>Login</a></p>",
-                    unsafe_allow_html=True,
-                )
+def _render_register_form(status_slot) -> None:
+    errors = st.session_state.get("register_errors", {})
+
+    with st.form("register_form", clear_on_submit=False):
+        st.markdown("### Create account")
+        st.caption("Set up your profile to unlock personalized quizzes.")
+
+        reg_name = st.text_input("Full Name", key="register_name", placeholder="John Doe")
+        _render_inline_error(errors.get("name", ""))
+
+        reg_email = st.text_input("Email", key="register_email", placeholder="you@example.com")
+        _render_inline_error(errors.get("email", ""))
+
+        show_passwords = st.toggle("Show passwords", key="register_show_passwords")
+        reg_password = st.text_input(
+            "Password",
+            key="register_password",
+            type="default" if show_passwords else "password",
+            placeholder="Minimum 6 characters",
+        )
+        _render_inline_error(errors.get("password", ""))
+
+        reg_confirm = st.text_input(
+            "Confirm Password",
+            key="register_confirm",
+            type="default" if show_passwords else "password",
+            placeholder="Re-enter password",
+        )
+        _render_inline_error(errors.get("confirm", ""))
+
+        st.caption("Select interests for personalized quizzes")
+        selected_interests = st.multiselect(
+            "Interests",
+            options=INTEREST_OPTIONS,
+            default=[],
+            placeholder="Choose one or more topics",
+            key="register_interests",
+        )
+        custom_interest = st.text_input(
+            "Custom Interest (optional)",
+            key="register_custom_interest",
+            placeholder="e.g., Cloud Computing",
+        )
+        _render_inline_error(errors.get("form", ""))
+
+        register_click = st.form_submit_button("Create Account", use_container_width=True)
+
+    if register_click:
+        form_errors = {}
+        reg_name = reg_name.strip()
+        reg_email = reg_email.strip()
+
+        if not reg_name:
+            form_errors["name"] = "Full name is required."
+
+        if not reg_email:
+            form_errors["email"] = "Email is required."
+        elif "@" not in reg_email:
+            form_errors["email"] = "Enter a valid email address."
+
+        if not reg_password:
+            form_errors["password"] = "Password is required."
+        elif len(reg_password) < 6:
+            form_errors["password"] = "Password must be at least 6 characters."
+
+        if reg_password != reg_confirm:
+            form_errors["confirm"] = "Passwords do not match."
+
+        if form_errors:
+            st.session_state["register_errors"] = form_errors
+            status_slot.empty()
+            st.rerun()
+
+        interests = selected_interests[:]
+        if custom_interest.strip():
             interests.append(custom_interest.strip())
 
-        result = register_user(reg_name.strip(), reg_email.strip(), reg_password, interests)
+        with st.spinner("Creating your account..."):
+            result = register_user(reg_name, reg_email, reg_password, interests)
+
         if result["success"]:
+            st.session_state["register_errors"] = {}
+            st.session_state["login_errors"] = {}
             set_session_user(result["user"])
             status_slot.success("Account created successfully. Redirecting...")
             st.rerun()
-        else:
-            status_slot.error(result["message"])
+
+        st.session_state["register_errors"] = {"form": result["message"]}
+        status_slot.empty()
+        st.rerun()
 
 
 def _render_footer_switch(mode: str) -> None:
     if mode == "Login":
-        left, right = st.columns([2, 1])
-        with left:
-            st.markdown("<p class='soft-note' style='text-align:left;'>New here?</p>", unsafe_allow_html=True)
-        with right:
-            if st.button("Register", use_container_width=True, key="switch_to_register"):
-                st.session_state["auth_mode"] = "Register"
-                st.rerun()
+        st.markdown(
+            "<p class='auth-switch-copy'>Don&#39;t have an account? <a href='?auth=register' target='_self'>Register</a></p>",
+            unsafe_allow_html=True,
+        )
     else:
-        left, right = st.columns([2, 1])
-        with left:
-            st.markdown("<p class='soft-note' style='text-align:left;'>Already have an account?</p>", unsafe_allow_html=True)
-        with right:
-            if st.button("Login", use_container_width=True, key="switch_to_login"):
-                st.session_state["auth_mode"] = "Login"
-                st.rerun()
+        st.markdown(
+            "<p class='auth-switch-copy'>Already have an account? <a href='?auth=login' target='_self'>Login</a></p>",
+            unsafe_allow_html=True,
+        )
 
 
 st.set_page_config(page_title="Login - AI Quiz App", page_icon="🔐", layout="wide")
@@ -351,7 +339,7 @@ mode = st.radio(
 
 st.markdown("<div class='auth-card'>", unsafe_allow_html=True)
 status_slot = st.empty()
-st.markdown("<div class='auth-status-slot'></div>", unsafe_allow_html=True)
+status_slot.markdown("<div class='auth-status-slot'></div>", unsafe_allow_html=True)
 
 if mode == "Login":
     _render_login_form(status_slot)

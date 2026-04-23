@@ -211,18 +211,12 @@ with left:
             st.caption("No quiz activity yet.")
         for row in recent_results:
             pct = round((row["score"] / row["total_questions"] * 100), 1) if row["total_questions"] else 0
-            date_value = row.get("date_taken")
-            date_text = (
-                date_value.strftime("%b %d, %Y")
-                if hasattr(date_value, "strftime")
-                else str(date_value)[:10]
-            )
             st.markdown(
                 f"""
                 <div class='topic-card'>
                     <div class='topic-name'>{row['category_name']} · {row['difficulty']}</div>
                     <div class='topic-desc'>
-                        Score: {row['score']}/{row['total_questions']} ({pct}%) · {date_text}
+                        Score: {row['score']}/{row['total_questions']} ({pct}%) · {row['date_taken'].strftime('%b %d, %Y')}
                     </div>
                 </div>
                 """,

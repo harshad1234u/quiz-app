@@ -207,16 +207,6 @@ div[data-testid='stSlider'] > div > div > div > div {
     gap: var(--space-2) !important;
 }
 
-[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px !important;
-}
-
-[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] > label {
-    margin: 0 !important;
-}
-
 [data-testid='stRadio'] > div > label {
     background: linear-gradient(180deg, rgba(16, 27, 47, 0.95), rgba(13, 23, 40, 0.95)) !important;
     border: 1px solid var(--border) !important;
@@ -270,26 +260,64 @@ div[data-testid='stToggle'] label {
 }
 
 .auth-shell {
-    max-width: 470px;
+    max-width: 500px;
     margin: 0 auto;
-    padding-top: 0.75rem;
+    padding-top: 0.25rem;
 }
 
 .auth-card {
-    padding: 1.35rem;
-    border-radius: 18px;
-    border: 1px solid rgba(118, 148, 221, 0.35);
-    background: linear-gradient(160deg, rgba(16, 26, 45, 0.96), rgba(13, 21, 37, 0.94));
-    box-shadow: var(--glow), var(--shadow-md);
+    position: relative;
+    padding: 1.3rem 1.4rem 1.2rem;
+    border-radius: 20px;
+    border: 1px solid rgba(130, 162, 236, 0.35);
+    background: linear-gradient(160deg, rgba(14, 24, 42, 0.92), rgba(11, 20, 35, 0.9));
+    box-shadow: var(--shadow-md), 0 0 0 1px rgba(130, 162, 236, 0.12), 0 20px 60px rgba(74, 131, 255, 0.2);
+    animation: auth-fade-in 280ms ease;
+}
+
+.auth-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(circle at top right, rgba(102, 137, 255, 0.18), transparent 45%);
 }
 
 .auth-head {
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.auth-brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(133, 165, 239, 0.35);
+    border-radius: 999px;
+    padding: 0.24rem 0.62rem 0.24rem 0.3rem;
+    color: #cfe0ff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: rgba(24, 38, 64, 0.72);
+    margin-bottom: 0.65rem;
+}
+
+.auth-brand-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #0e1630;
+    background: linear-gradient(135deg, #7ea6ff, #3eceff);
 }
 
 .auth-title {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 2rem;
+    font-size: 2.05rem;
     font-weight: 700;
     margin: 0;
     background: linear-gradient(90deg, #dbe5ff, #9fc8ff 60%, #77edff);
@@ -298,21 +326,22 @@ div[data-testid='stToggle'] label {
 }
 
 .auth-sub {
-    margin-top: 0.35rem;
+    margin-top: 0.25rem;
     color: var(--text-2);
-    font-size: 0.94rem;
+    font-size: 0.92rem;
+    line-height: 1.45;
 }
 
 .auth-status-slot {
-    min-height: 2.25rem;
-    margin-bottom: 0.35rem;
+    min-height: 1rem;
+    margin-bottom: 0.1rem;
 }
 
 .auth-divider {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0.9rem 0 0.8rem;
+    margin: 0.82rem 0 0.65rem;
     color: var(--text-2);
     font-size: 0.84rem;
 }
@@ -329,6 +358,159 @@ div[data-testid='stToggle'] label {
     color: var(--text-2);
     font-size: 0.82rem;
     text-align: center;
+}
+
+.auth-default-note {
+    margin-top: 0.45rem;
+    margin-bottom: 0.15rem;
+}
+
+.google-config-note {
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+}
+
+.auth-switch-copy {
+    margin: 0.2rem 0 0;
+    text-align: center;
+    color: var(--text-2);
+    font-size: 0.88rem;
+}
+
+.auth-switch-copy a {
+    color: #89b6ff;
+    text-decoration: none;
+    font-weight: 700;
+    transition: var(--ease);
+}
+
+.auth-switch-copy a:hover {
+    color: #b6ceff;
+    text-decoration: underline;
+}
+
+.inline-error {
+    margin: 0.33rem 0 0.52rem;
+    font-size: 0.79rem;
+    color: #ff8f9a;
+    line-height: 1.35;
+}
+
+.auth-card div[data-testid='stForm'] {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.auth-card [data-testid='stForm'] h3 {
+    font-size: 1.45rem;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem;
+}
+
+.auth-card [data-testid='stCaptionContainer'] {
+    color: var(--text-2) !important;
+}
+
+.auth-card .stTextInput > div > div {
+    min-height: 46px;
+    border: 1px solid rgba(132, 163, 234, 0.26) !important;
+    background: linear-gradient(180deg, rgba(14, 24, 40, 0.9), rgba(11, 20, 35, 0.9)) !important;
+    transition: var(--ease);
+}
+
+.auth-card .stTextInput > div > div:hover {
+    border-color: rgba(120, 160, 247, 0.44) !important;
+}
+
+.auth-card .stTextInput > div > div:focus-within {
+    border-color: rgba(111, 155, 255, 0.75) !important;
+    box-shadow: 0 0 0 2px rgba(92, 145, 255, 0.2), 0 8px 20px rgba(59, 120, 227, 0.18) !important;
+}
+
+.auth-card [data-testid='stWidgetLabel'] {
+    font-size: 0.84rem;
+    color: #cad9fb !important;
+    font-weight: 600;
+}
+
+.auth-card .stButton > button {
+    min-height: 48px !important;
+    border-radius: 12px !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em;
+    background: linear-gradient(90deg, #6f6cff 0%, #4789ff 52%, #2cc5ff 100%) !important;
+    box-shadow: 0 12px 28px rgba(75, 130, 246, 0.32) !important;
+}
+
+.auth-card .stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 16px 36px rgba(75, 130, 246, 0.4) !important;
+}
+
+.auth-card .stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+.auth-card .stLinkButton > a {
+    min-height: 48px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(190, 206, 236, 0.45) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #f2f7ff !important;
+    font-family: 'Space Grotesk', 'Manrope', sans-serif !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: var(--ease) !important;
+}
+
+.auth-card .stLinkButton > a:hover {
+    border-color: rgba(217, 228, 252, 0.78) !important;
+    background: rgba(255, 255, 255, 0.11) !important;
+    transform: translateY(-1px);
+}
+
+.auth-card div[data-testid='stToggle'] {
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+
+[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] {
+    padding: 4px;
+    border: 1px solid rgba(126, 157, 224, 0.35);
+    border-radius: 12px;
+    background: rgba(17, 30, 51, 0.62);
+}
+
+[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] > label {
+    border-radius: 9px !important;
+    border: 1px solid transparent !important;
+    padding: 0.62rem 0.85rem !important;
+    text-align: center;
+    justify-content: center;
+}
+
+[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] > label:hover {
+    border-color: rgba(123, 163, 255, 0.4) !important;
+}
+
+[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] [aria-checked='true'] {
+    border-color: rgba(109, 155, 255, 0.75) !important;
+    box-shadow: 0 8px 18px rgba(66, 118, 223, 0.22);
+    background: linear-gradient(140deg, rgba(44, 67, 111, 0.95), rgba(26, 45, 78, 0.95)) !important;
+}
+
+@keyframes auth-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .card-panel {
@@ -594,7 +776,7 @@ div[data-testid='stToggle'] label {
 
 @media (max-width: 768px) {
     .auth-shell { max-width: 100%; }
-    .auth-card { padding: 1rem; border-radius: 14px; }
+    .auth-card { padding: 1rem; border-radius: 16px; }
     .section-title { font-size: 1.5rem; }
     .topic-card { padding: 0.75rem; }
 }

@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
     --bg-0: #070b14;
@@ -265,6 +265,17 @@ div[data-testid='stToggle'] label {
     padding-top: 0.25rem;
 }
 
+.auth-shell-anchor,
+.auth-card-anchor,
+.auth-mode-anchor {
+    display: none;
+}
+
+div[data-testid='stVerticalBlock']:has(.auth-shell-anchor) {
+    max-width: 520px;
+    margin-inline: auto;
+}
+
 .auth-card {
     position: relative;
     padding: 1.3rem 1.4rem 1.2rem;
@@ -275,7 +286,26 @@ div[data-testid='stToggle'] label {
     animation: auth-fade-in 280ms ease;
 }
 
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) {
+    position: relative;
+    padding: 1.3rem 1.4rem 1.2rem;
+    border-radius: 20px;
+    border: 1px solid rgba(130, 162, 236, 0.35);
+    background: linear-gradient(160deg, rgba(14, 24, 42, 0.92), rgba(11, 20, 35, 0.9));
+    box-shadow: var(--shadow-md), 0 0 0 1px rgba(130, 162, 236, 0.12), 0 20px 60px rgba(74, 131, 255, 0.2);
+    animation: auth-fade-in 280ms ease;
+}
+
 .auth-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(circle at top right, rgba(102, 137, 255, 0.18), transparent 45%);
+}
+
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor)::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -396,46 +426,54 @@ div[data-testid='stToggle'] label {
     line-height: 1.35;
 }
 
-.auth-card div[data-testid='stForm'] {
+.auth-card div[data-testid='stForm'],
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) div[data-testid='stForm'] {
     border: none !important;
     background: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
 
-.auth-card [data-testid='stForm'] h3 {
+.auth-card [data-testid='stForm'] h3,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) [data-testid='stForm'] h3 {
     font-size: 1.45rem;
     margin-top: 0.1rem;
     margin-bottom: 0.1rem;
 }
 
-.auth-card [data-testid='stCaptionContainer'] {
+.auth-card [data-testid='stCaptionContainer'],
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) [data-testid='stCaptionContainer'] {
     color: var(--text-2) !important;
 }
 
-.auth-card .stTextInput > div > div {
+.auth-card .stTextInput > div > div,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stTextInput > div > div {
     min-height: 46px;
     border: 1px solid rgba(132, 163, 234, 0.26) !important;
     background: linear-gradient(180deg, rgba(14, 24, 40, 0.9), rgba(11, 20, 35, 0.9)) !important;
     transition: var(--ease);
 }
 
-.auth-card .stTextInput > div > div:hover {
+.auth-card .stTextInput > div > div:hover,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stTextInput > div > div:hover {
     border-color: rgba(120, 160, 247, 0.44) !important;
 }
 
-.auth-card .stTextInput > div > div:focus-within {
+.auth-card .stTextInput > div > div:focus-within,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stTextInput > div > div:focus-within {
     border-color: rgba(111, 155, 255, 0.75) !important;
     box-shadow: 0 0 0 2px rgba(92, 145, 255, 0.2), 0 8px 20px rgba(59, 120, 227, 0.18) !important;
 }
 
-.auth-card [data-testid='stWidgetLabel'] {
+.auth-card [data-testid='stWidgetLabel'],
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) [data-testid='stWidgetLabel'] {
     font-size: 0.84rem;
     color: #cad9fb !important;
     font-weight: 600;
 }
 
-.auth-card .stButton > button {
+.auth-card .stButton > button,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stButton > button {
     min-height: 48px !important;
     border-radius: 12px !important;
     font-size: 1rem !important;
@@ -445,16 +483,19 @@ div[data-testid='stToggle'] label {
     box-shadow: 0 12px 28px rgba(75, 130, 246, 0.32) !important;
 }
 
-.auth-card .stButton > button:hover {
+.auth-card .stButton > button:hover,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stButton > button:hover {
     transform: translateY(-2px) !important;
     box-shadow: 0 16px 36px rgba(75, 130, 246, 0.4) !important;
 }
 
-.auth-card .stButton > button:active {
+.auth-card .stButton > button:active,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stButton > button:active {
     transform: translateY(0) !important;
 }
 
-.auth-card .stLinkButton > a {
+.auth-card .stLinkButton > a,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stLinkButton > a {
     min-height: 48px !important;
     border-radius: 12px !important;
     border: 1px solid rgba(190, 206, 236, 0.45) !important;
@@ -466,25 +507,27 @@ div[data-testid='stToggle'] label {
     transition: var(--ease) !important;
 }
 
-.auth-card .stLinkButton > a:hover {
+.auth-card .stLinkButton > a:hover,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) .stLinkButton > a:hover {
     border-color: rgba(217, 228, 252, 0.78) !important;
     background: rgba(255, 255, 255, 0.11) !important;
     transform: translateY(-1px);
 }
 
-.auth-card div[data-testid='stToggle'] {
+.auth-card div[data-testid='stToggle'],
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) div[data-testid='stToggle'] {
     margin-top: 0.2rem;
     margin-bottom: 0.2rem;
 }
 
-[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] {
+div[data-testid='stVerticalBlock']:has(.auth-mode-anchor) [data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] {
     padding: 4px;
     border: 1px solid rgba(126, 157, 224, 0.35);
     border-radius: 12px;
     background: rgba(17, 30, 51, 0.62);
 }
 
-[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] > label {
+div[data-testid='stVerticalBlock']:has(.auth-mode-anchor) [data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] > label {
     border-radius: 9px !important;
     border: 1px solid transparent !important;
     padding: 0.62rem 0.85rem !important;
@@ -492,11 +535,11 @@ div[data-testid='stToggle'] label {
     justify-content: center;
 }
 
-[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] > label:hover {
+div[data-testid='stVerticalBlock']:has(.auth-mode-anchor) [data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] > label:hover {
     border-color: rgba(123, 163, 255, 0.4) !important;
 }
 
-[data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] [aria-checked='true'] {
+div[data-testid='stVerticalBlock']:has(.auth-mode-anchor) [data-testid='stRadio'] [role='radiogroup'][aria-orientation='horizontal'] [aria-checked='true'] {
     border-color: rgba(109, 155, 255, 0.75) !important;
     box-shadow: 0 8px 18px rgba(66, 118, 223, 0.22);
     background: linear-gradient(140deg, rgba(44, 67, 111, 0.95), rgba(26, 45, 78, 0.95)) !important;
@@ -769,6 +812,193 @@ div[data-testid='stToggle'] label {
     margin: 0.9rem 0;
 }
 
+/* ─── Enhanced Glassmorphism & Glow Effects ─────────────────────────────── */
+
+.stApp::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(ellipse 600px 400px at 20% 20%, rgba(107,125,255,0.08), transparent),
+        radial-gradient(ellipse 500px 350px at 80% 80%, rgba(169,107,255,0.06), transparent),
+        radial-gradient(ellipse 400px 300px at 50% 50%, rgba(51,195,255,0.04), transparent);
+    pointer-events: none;
+    animation: bg-drift 20s ease-in-out infinite alternate;
+    z-index: 0;
+}
+
+@keyframes bg-drift {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(30px, -20px) rotate(3deg); }
+}
+
+/* Glass card effect */
+.glass-card,
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) {
+    backdrop-filter: blur(16px) saturate(1.4) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(1.4) !important;
+}
+
+/* Enhanced card panel with glass + glow */
+.card-panel {
+    border: 1px solid rgba(124, 154, 225, 0.28);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.1rem;
+    background: linear-gradient(160deg, rgba(16, 27, 47, 0.92), rgba(12, 20, 35, 0.88)) !important;
+    backdrop-filter: blur(12px) saturate(1.3);
+    -webkit-backdrop-filter: blur(12px) saturate(1.3);
+    box-shadow: var(--shadow-sm);
+    transition: border-color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
+}
+
+.card-panel:hover {
+    border-color: rgba(107, 125, 255, 0.45);
+    box-shadow: 0 8px 32px rgba(107, 125, 255, 0.15), var(--shadow-sm);
+    transform: translateY(-2px);
+}
+
+/* Animated gradient button */
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.stButton > button {
+    background: linear-gradient(135deg, var(--accent-a), var(--accent-b), var(--accent-c), var(--accent-a)) !important;
+    background-size: 300% 300% !important;
+    animation: gradient-shift 6s ease infinite !important;
+}
+
+/* Neon glow on focus for inputs */
+.stTextInput > div > div:focus-within {
+    border-color: rgba(107, 125, 255, 0.7) !important;
+    box-shadow:
+        0 0 0 2px rgba(107, 125, 255, 0.15),
+        0 0 20px rgba(107, 125, 255, 0.1),
+        0 0 40px rgba(107, 125, 255, 0.05) !important;
+}
+
+/* Auth card enhanced glow */
+div[data-testid='stVerticalBlock']:has(.auth-card-anchor) {
+    border: 1px solid rgba(130, 162, 236, 0.35);
+    box-shadow:
+        0 0 0 1px rgba(130, 162, 236, 0.12),
+        0 20px 60px rgba(74, 131, 255, 0.2),
+        0 0 80px rgba(107, 125, 255, 0.06) !important;
+}
+
+/* Pulse glow keyframe for important elements */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(107, 125, 255, 0.15); }
+    50% { box-shadow: 0 0 35px rgba(107, 125, 255, 0.25); }
+}
+
+/* Interest chips enhanced */
+.tag-pill {
+    transition: all 200ms ease;
+    cursor: default;
+}
+
+.tag-pill:hover {
+    border-color: rgba(107, 125, 255, 0.6);
+    background: rgba(107, 125, 255, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 125, 255, 0.2);
+}
+
+/* Topic card enhanced hover */
+.topic-card {
+    transition: all 250ms ease;
+}
+
+.topic-card:hover {
+    border-color: rgba(108, 153, 255, 0.6);
+    background: linear-gradient(150deg, rgba(24, 37, 64, 0.95), rgba(15, 25, 45, 0.95));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(107, 125, 255, 0.12);
+}
+
+/* Category choice enhanced */
+.category-choice {
+    transition: all 250ms ease;
+}
+
+.category-choice:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(107, 125, 255, 0.12);
+}
+
+/* Metric cards glow on hover */
+div[data-testid='stMetric'] {
+    transition: all 250ms ease !important;
+}
+
+div[data-testid='stMetric']:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(107, 125, 255, 0.15) !important;
+}
+
+/* Smooth page transitions */
+.stApp [data-testid='stAppViewContainer'] {
+    animation: page-fade-in 350ms ease;
+}
+
+@keyframes page-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Leaderboard row hover */
+.leader-row {
+    transition: all 200ms ease;
+}
+
+.leader-row:hover {
+    border-color: rgba(107, 125, 255, 0.4) !important;
+    background: rgba(107, 125, 255, 0.05) !important;
+    transform: translateX(4px);
+}
+
+/* Quiz timer pulse when low */
+@keyframes timer-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.timer-urgent {
+    animation: timer-pulse 1s ease infinite;
+}
+
+/* Expander styling */
+div[data-testid='stExpander'] {
+    border: 1px solid rgba(124, 154, 225, 0.2) !important;
+    border-radius: var(--radius-md) !important;
+    background: rgba(16, 27, 47, 0.6) !important;
+    backdrop-filter: blur(8px);
+    transition: border-color 200ms ease;
+}
+
+div[data-testid='stExpander']:hover {
+    border-color: rgba(107, 125, 255, 0.35) !important;
+}
+
+/* Selectbox enhanced */
+.stSelectbox > div > div {
+    transition: all 200ms ease !important;
+}
+
+/* Smooth scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(107, 125, 255, 0.3) transparent;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────── */
+
 @media (max-width: 1050px) {
     .page-shell { max-width: 100%; }
     .summary-card { position: static; }
@@ -776,7 +1006,11 @@ div[data-testid='stToggle'] label {
 
 @media (max-width: 768px) {
     .auth-shell { max-width: 100%; }
-    .auth-card { padding: 1rem; border-radius: 16px; }
+    .auth-card,
+    div[data-testid='stVerticalBlock']:has(.auth-card-anchor) {
+        padding: 1rem;
+        border-radius: 16px;
+    }
     .section-title { font-size: 1.5rem; }
     .topic-card { padding: 0.75rem; }
 }

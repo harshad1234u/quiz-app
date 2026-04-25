@@ -1,4 +1,4 @@
-﻿"""
+"""
 User dashboard page.
 """
 import os
@@ -14,6 +14,7 @@ from utils.auth import (
     require_login,
     require_topics,
     update_user_interests,
+    force_refresh_interests,
 )
 from utils.gemini_ai import suggest_topics
 from utils.quiz import get_categories, get_category_stats, get_user_results, get_user_stats
@@ -262,6 +263,7 @@ with right:
             if custom.strip():
                 merged.append(custom.strip())
             update_user_interests(user_id, merged)
+            force_refresh_interests()  # Clear stale state so Quiz page reads fresh DB
             st.success("Interests updated.")
             st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)

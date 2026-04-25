@@ -1,4 +1,390 @@
 """
+Login and registration page.
+"""
+
+import os
+from urllib.parse import urlencode
+
+import streamlit as st
+
+from utils.auth import (
+    INTEREST_OPTIONS,
+    google_oauth_upsert,
+    has_selected_topics,
+    is_logged_in,
+    login_user,
+    logout,
+    register_user,
+    require_topics,
+    set_session_user,
+)
+
+
+def _get_secret(key: str, default: str = "") -> str:
+    try:
+        return str(st.secrets[key]).strip()
+    except (KeyError, FileNotFoundError):
+        return default
+
+
+def _load_styles() -> None:
+    css_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "style.css")
+    if os.path.exists(css_path):
+        with open(css_path, encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+def _render_sidebar() -> None:
+    with st.sidebar:
+        st.markdown("# AI Quiz App")
+        st.caption("Powered by Google Gemini")
+        st.divider()
+        if is_logged_in():
+            user = st.session_state.get("user", {})
+            st.markdown(f"**{user.get('name', 'User')}**")
+            if st.button("Logout", use_container_width=True, key="auth_sidebar_logout"):
+                logout()
+                st.rerun()
+
+
+def _render_inline_error(message: str) -> None:
+    if message:
+        st.markdown(f"<p class='inline-error'>{message}</p>", unsafe_allow_html=True)
+
+
+def _render_login_form(status_slot) -> None:
+    errors = st.session_state.get("login_errors", {})
+
+    with st.form("login_form", clear_on_submit=False):
+        st.markdown("### Welcome back")
+        st.caption("Use your account to continue your learning journey.")
+
+        email = st.text_input("Email", key="login_email", placeholder="you@example.com")
+        _render_inline_error(errors.get("email", ""))
+
+        show_password = st.toggle("Show password", key="login_show_password")
+        password = st.text_input(
+            "Password",
+            key="login_password",
+            type="default" if show_password else "password",
+            placeholder="Enter your password",
+        )
+        _render_inline_error(errors.get("password", ""))
+        _render_inline_error(errors.get("form", ""))
+
+        login_click = st.form_submit_button("Login", use_container_width=True)
+
+    if login_click:
+        form_errors = {}
+        email = email.strip()
+
+        if not email:
+            form_errors["email"] = "Email is required."
+        elif "@" not in email:
+            form_errors["email"] = "Enter a valid email address."
+
+        if not password:
+            form_errors["password"] = "Password is required."
+
+        if form_errors:
+            st.session_state["login_errors"] = form_errors
+            status_slot.empty()
+            st.rerun()
+
+        with st.spinner("Signing you in..."):
+            result = login_user(email, password)
+
+        if result["success"]:
+            st.session_state["login_errors"] = {}
+            st.session_state["register_errors"] = {}
+            set_session_user(result["user"])
+            status_slot.success("Login successful. Redirecting...")
+            st.rerun()
+
+        st.session_state["login_errors"] = {"form": result["message"]}
+        status_slot.empty()
+        st.rerun()
+
+    st.markdown(
+        "<p class='soft-note auth-default-note'>Default admin login: <b>admin@quizapp.com</b> / <b>admin123</b></p>",
+        unsafe_allow_html=True,
+    )
+
+
+def _render_register_form(status_slot) -> None:
+    errors = st.session_state.get("register_errors", {})
+
+    with st.form("register_form", clear_on_submit=False):
+        st.markdown("### Create account")
+        st.caption("Set up your profile to unlock personalized quizzes.")
+
+        reg_name = st.text_input("Full Name", key="register_name", placeholder="John Doe")
+        _render_inline_error(errors.get("name", ""))
+
+        reg_email = st.text_input("Email", key="register_email", placeholder="you@example.com")
+        _render_inline_error(errors.get("email", ""))
+
+        show_passwords = st.toggle("Show passwords", key="register_show_passwords")
+        reg_password = st.text_input(
+            "Password",
+            key="register_password",
+            type="default" if show_passwords else "password",
+            placeholder="Minimum 6 characters",
+        )
+        _render_inline_error(errors.get("password", ""))
+
+        reg_confirm = st.text_input(
+            "Confirm Password",
+            key="register_confirm",
+            type="default" if show_passwords else "password",
+            placeholder="Re-enter password",
+        )
+        _render_inline_error(errors.get("confirm", ""))
+
+        st.caption("Select interests for personalized quizzes")
+        selected_interests = st.multiselect(
+            "Interests",
+            options=INTEREST_OPTIONS,
+            default=[],
+            placeholder="Choose one or more topics",
+            key="register_interests",
+        )
+        custom_interest = st.text_input(
+            "Custom Interest (optional)",
+            key="register_custom_interest",
+            placeholder="e.g., Cloud Computing",
+        )
+        _render_inline_error(errors.get("form", ""))
+
+        register_click = st.form_submit_button("Create Account", use_container_width=True)
+
+    if register_click:
+        form_errors = {}
+        reg_name = reg_name.strip()
+        reg_email = reg_email.strip()
+
+        if not reg_name:
+            form_errors["name"] = "Full name is required."
+
+        if not reg_email:
+            form_errors["email"] = "Email is required."
+        elif "@" not in reg_email:
+            form_errors["email"] = "Enter a valid email address."
+
+        if not reg_password:
+            form_errors["password"] = "Password is required."
+        elif len(reg_password) < 6:
+            form_errors["password"] = "Password must be at least 6 characters."
+
+        if reg_password != reg_confirm:
+            form_errors["confirm"] = "Passwords do not match."
+
+        if form_errors:
+            st.session_state["register_errors"] = form_errors
+            status_slot.empty()
+            st.rerun()
+
+        interests = selected_interests[:]
+        if custom_interest.strip():
+            interests.append(custom_interest.strip())
+
+        with st.spinner("Creating your account..."):
+            result = register_user(reg_name, reg_email, reg_password, interests)
+
+        if result["success"]:
+            st.session_state["register_errors"] = {}
+            st.session_state["login_errors"] = {}
+            set_session_user(result["user"])
+            status_slot.success("Account created successfully. Redirecting...")
+            st.rerun()
+
+        st.session_state["register_errors"] = {"form": result["message"]}
+        status_slot.empty()
+        st.rerun()
+
+
+def _render_auth_mode_selector() -> str:
+    options = ["Login", "Register"]
+    current_mode = st.session_state.get("auth_mode", "Login")
+    if current_mode not in options:
+        current_mode = "Login"
+
+    if hasattr(st, "segmented_control"):
+        selected = st.segmented_control(
+            "Auth Mode",
+            options=options,
+            default=current_mode,
+            selection_mode="single",
+            label_visibility="collapsed",
+        )
+        if selected in options:
+            st.session_state["auth_mode"] = selected
+        return st.session_state["auth_mode"]
+
+    selected = st.radio(
+        "Auth Mode",
+        options,
+        index=options.index(current_mode),
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    st.session_state["auth_mode"] = selected
+    return selected
+
+
+def _render_footer_switch(mode: str) -> None:
+    if mode == "Login":
+        st.markdown(
+            "<p class='auth-switch-copy'>Don&#39;t have an account? <a href='?auth=register' target='_self'>Register</a></p>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            "<p class='auth-switch-copy'>Already have an account? <a href='?auth=login' target='_self'>Login</a></p>",
+            unsafe_allow_html=True,
+        )
+
+
+def _render_google_section() -> None:
+    st.markdown("<div class='auth-divider'>OR continue with Google</div>", unsafe_allow_html=True)
+
+    google_client_id = _get_secret("GOOGLE_CLIENT_ID")
+    google_client_secret = _get_secret("GOOGLE_CLIENT_SECRET")
+
+    if not google_client_id or not google_client_secret:
+        st.markdown(
+            "<p class='soft-note google-config-note'>Google sign-in is not configured yet. "
+            "Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .streamlit/secrets.toml.</p>",
+            unsafe_allow_html=True,
+        )
+        return
+
+    redirect_uri = _get_secret("GOOGLE_REDIRECT_URI", "https://quiz-app-rhs.streamlit.app/Login")
+    params = {
+        "client_id": google_client_id,
+        "redirect_uri": redirect_uri,
+        "scope": "openid email profile",
+        "response_type": "code",
+        "access_type": "offline",
+        "prompt": "consent",
+    }
+    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
+    st.link_button("Continue with Google", auth_url, use_container_width=True)
+
+    query_params = st.query_params
+    auth_code = query_params.get("code")
+    if isinstance(auth_code, list):
+        auth_code = auth_code[0] if auth_code else None
+
+    if not auth_code:
+        return
+
+    try:
+        import requests as req
+
+        token_resp = req.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": auth_code,
+                "client_id": google_client_id,
+                "client_secret": google_client_secret,
+                "redirect_uri": redirect_uri,
+                "grant_type": "authorization_code",
+            },
+            timeout=25,
+        )
+        tokens = token_resp.json()
+
+        if "access_token" not in tokens:
+            st.error("OAuth token exchange failed. Please try again.")
+            return
+
+        user_resp = req.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {tokens['access_token']}"},
+            timeout=25,
+        )
+        guser = user_resp.json()
+
+        db_user = google_oauth_upsert(
+            google_id=guser.get("id"),
+            name=guser.get("name", "Google User"),
+            email=guser.get("email"),
+            avatar_url=guser.get("picture"),
+        )
+
+        if not db_user:
+            st.error("Failed to create your account. Please try again.")
+            return
+
+        set_session_user(db_user)
+        st.query_params.clear()
+        if not has_selected_topics(db_user["user_id"]):
+            st.success("Signed in with Google. Let's set up your profile!")
+            st.session_state["needs_onboarding"] = True
+        else:
+            st.success("Signed in with Google.")
+        st.rerun()
+    except Exception as exc:
+        st.error(f"Google sign-in error: {exc}")
+
+
+st.set_page_config(page_title="Login - AI Quiz App", page_icon="🔐", layout="wide")
+_load_styles()
+_render_sidebar()
+
+if is_logged_in():
+    if st.session_state.get("needs_onboarding"):
+        require_topics()
+    st.success(f"You are already logged in as {st.session_state['user_name']}.")
+    st.info("Use the sidebar to open Dashboard or Quiz.")
+    st.stop()
+
+if "auth_mode" not in st.session_state:
+    st.session_state["auth_mode"] = "Login"
+
+switch_mode = st.query_params.get("auth")
+if isinstance(switch_mode, list):
+    switch_mode = switch_mode[0] if switch_mode else None
+if isinstance(switch_mode, str) and switch_mode.lower() in {"login", "register"}:
+    st.session_state["auth_mode"] = switch_mode.capitalize()
+
+_, center, _ = st.columns([1.05, 1.7, 1.05], gap="large")
+
+with center:
+    st.markdown("<div class='auth-shell-anchor'></div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class='auth-head'>
+            <div class='auth-brand-pill'>
+                <span class='auth-brand-dot'>AI</span>
+                <span>AI Quiz App</span>
+            </div>
+            <p class='section-kicker'>Secure Access</p>
+            <h1 class='auth-title'>AI Quiz App</h1>
+            <p class='auth-sub'>Sign in to continue your learning journey.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("<div class='auth-mode-anchor'></div>", unsafe_allow_html=True)
+    mode = _render_auth_mode_selector()
+
+    with st.container(border=True):
+        st.markdown("<div class='auth-card-anchor'></div>", unsafe_allow_html=True)
+        status_slot = st.empty()
+        status_slot.markdown("<div class='auth-status-slot'></div>", unsafe_allow_html=True)
+
+        if mode == "Login":
+            _render_login_form(status_slot)
+        else:
+            _render_register_form(status_slot)
+
+        _render_google_section()
+        st.markdown("<hr class='subtle-divider' />", unsafe_allow_html=True)
+        _render_footer_switch(mode)<<<<<<< HEAD
+"""
 🔐 Login & Registration Page
 """
 import streamlit as st
@@ -97,149 +483,97 @@ with tab_register:
             reg_confirm = st.text_input("🔒 Confirm Password", type="password", placeholder="Re-enter password", key="reg_confirm")
 
             st.markdown("##### 🎯 Select Your Interests")
-            st.caption("Choose topics you're interested in for personalized quizzes")
-
-            # Interest checkboxes in two columns
-            int_cols = st.columns(2)
-            selected_interests = []
-            for i, interest in enumerate(INTEREST_OPTIONS):
-                with int_cols[i % 2]:
-                    if st.checkbox(interest, key=f"int_{interest}"):
-                        selected_interests.append(interest)
-
-            custom_interest = st.text_input("➕ Custom Interest (optional)", placeholder="e.g., Cloud Computing")
-
-            submitted = st.form_submit_button("✨ Create Account", use_container_width=True)
-
-            if submitted:
-                if not reg_name or not reg_email or not reg_password:
-                    st.error("Please fill in all required fields.")
-                elif len(reg_password) < 6:
-                    st.error("Password must be at least 6 characters.")
-                elif reg_password != reg_confirm:
-                    st.error("Passwords do not match.")
-                else:
-                    interests = selected_interests[:]
-                    if custom_interest.strip():
-                        interests.append(custom_interest.strip())
-
-                    result = register_user(reg_name.strip(), reg_email.strip(), reg_password, interests)
-                    if result["success"]:
-                        set_session_user(result["user"])
-                        st.success("🎉 " + result["message"])
-                        st.balloons()
-                        st.rerun()
-                    else:
-                        st.error(result["message"])
-
-# ─── Google Sign-In Tab ───────────────────────────────────────────────────────
-with tab_google:
-    st.markdown("")
-    col_left, col_form, col_right = st.columns([1, 2, 1])
-    with col_form:
-        import secrets
-        from urllib.parse import urlencode, urlparse
-        import requests as req
-
-        google_client_id = os.getenv("GOOGLE_CLIENT_ID", "")
-        google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
-        redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8501").strip()
-
-        def _is_valid_redirect_uri(uri: str) -> bool:
             """
-            Accept any non-empty HTTPS URI or localhost HTTP URI.
-            This allows both local dev and production OAuth flows.
+            Login and registration page.
             """
-            try:
-                parsed = urlparse(uri)
-                # Must have a scheme and netloc
-                if not parsed.scheme or not parsed.netloc:
-                    return False
-                # Allow HTTPS for any domain (production URLs)
-                if parsed.scheme == "https":
-                    return True
-                # Allow HTTP only for localhost / 127.0.0.1
-                if parsed.scheme == "http" and parsed.netloc.split(":")[0] in ("localhost", "127.0.0.1"):
-                    return True
-                return False
-            except Exception:
-                return False
+            import os
+            from urllib.parse import urlencode
 
-        if not google_client_id or not google_client_secret:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #1A1D29, #22263A); 
-                        border: 1px solid rgba(108,99,255,0.15); border-radius: 16px; 
-                        padding: 2rem; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🌐</div>
-                <h3 style="color: #FAFAFA;">Google Sign-In</h3>
-                <p style="color: #A0A4B8;">
-                    To enable Google Sign-In, add your Google OAuth credentials to the <code>.env</code> file:
-                </p>
-                <code style="color: #00D2FF;">
-                    GOOGLE_CLIENT_ID=your_client_id<br>
-                    GOOGLE_CLIENT_SECRET=your_client_secret
-                </code>
-                <p style="color: #A0A4B8; margin-top: 1rem; font-size: 0.85rem;">
-                    Get credentials from 
-                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" 
-                       style="color: #6C63FF;">Google Cloud Console</a>
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
-        elif not _is_valid_redirect_uri(redirect_uri):
-            st.error(
-                f"⛔ Invalid Google redirect URI: `{redirect_uri}`. "
-                "It must be `https://...` (production) or `http://localhost:PORT` (local). "
-                "Update `GOOGLE_REDIRECT_URI` in your `.env` file and in the "
-                "[Google Cloud Console](https://console.cloud.google.com/apis/credentials) "
-                "Authorized redirect URIs list."
+            import streamlit as st
+
+            from utils.auth import (
+                INTEREST_OPTIONS,
+                google_oauth_upsert,
+                is_logged_in,
+                login_user,
+                logout,
+                register_user,
+                set_session_user,
+                has_selected_topics,
+                force_refresh_interests,
             )
-        else:
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #1A1D29, #22263A); 
-                        border: 1px solid rgba(108,99,255,0.15); border-radius: 16px; 
-                        padding: 2rem; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🌐</div>
-                <h3 style="color: #FAFAFA;">Sign in with Google</h3>
-                <p style="color: #A0A4B8;">
-                    Click below to authenticate with your Google account
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
 
-            if "google_oauth_state" not in st.session_state:
-                st.session_state["google_oauth_state"] = secrets.token_urlsafe(24)
 
-            params = {
-                "client_id": google_client_id,
-                "redirect_uri": redirect_uri,
-                "scope": "openid email profile",
-                "response_type": "code",
-                "access_type": "offline",
-                "prompt": "consent",
-                "state": st.session_state["google_oauth_state"],
-            }
-            auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
-            st.link_button("🔗 Sign in with Google", auth_url, use_container_width=True)
+            def _get_secret(key: str, default: str = "") -> str:
+                try:
+                    return str(st.secrets[key]).strip()
+                except (KeyError, FileNotFoundError):
+                    return default
 
-            # Handle OAuth callback
-            query_params = st.query_params
-            auth_code = query_params.get("code")
-            oauth_error = query_params.get("error")
-            returned_state = query_params.get("state")
 
-            if oauth_error:
-                st.error(f"Google Sign-In was canceled or failed: {oauth_error}")
-                st.query_params.clear()
+            def _load_styles() -> None:
+                css_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "style.css")
+                if os.path.exists(css_path):
+                    with open(css_path, encoding="utf-8") as f:
+                        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-            elif auth_code:
-                if not returned_state or returned_state != st.session_state.get("google_oauth_state"):
-                    st.error("Invalid OAuth state. Please try signing in again.")
-                    st.query_params.clear()
-                    st.session_state["google_oauth_state"] = secrets.token_urlsafe(24)
-                    st.stop()
+
+            def _render_sidebar() -> None:
+                with st.sidebar:
+                    st.markdown("# AI Quiz App")
+                    st.caption("Powered by Google Gemini")
+                    st.divider()
+                    if is_logged_in():
+                        user = st.session_state.get("user", {})
+                        st.markdown(f"**{user.get('name', 'User')}**")
+                        if st.button("Logout", use_container_width=True, key="auth_sidebar_logout"):
+                            logout()
+                            st.rerun()
+
+
+            def _render_inline_error(message: str) -> None:
+                if not message:
+                    return
+                st.markdown(f"<p class='inline-error'>{message}</p>", unsafe_allow_html=True)
+
+
+            def _render_google_section() -> None:
+                st.markdown("<div class='auth-divider'>OR continue with Google</div>", unsafe_allow_html=True)
+
+                google_client_id = _get_secret("GOOGLE_CLIENT_ID")
+                google_client_secret = _get_secret("GOOGLE_CLIENT_SECRET")
+
+                if not google_client_id or not google_client_secret:
+                    st.markdown(
+                        "<p class='soft-note google-config-note'>Google sign-in is not configured yet. "
+                        "Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .streamlit/secrets.toml.</p>",
+                        unsafe_allow_html=True,
+                    )
+                    return
+
+                redirect_uri = _get_secret("GOOGLE_REDIRECT_URI", "https://quiz-app-rhs.streamlit.app/Login")
+                params = {
+                    "client_id": google_client_id,
+                    "redirect_uri": redirect_uri,
+                    "scope": "openid email profile",
+                    "response_type": "code",
+                    "access_type": "offline",
+                    "prompt": "consent",
+                }
+                auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
+                st.link_button("Continue with Google", auth_url, use_container_width=True)
+
+                query_params = st.query_params
+                auth_code = query_params.get("code")
+                if isinstance(auth_code, list):
+                    auth_code = auth_code[0] if auth_code else None
+
+                if not auth_code:
+                    return
 
                 try:
+                    import requests as req
+
                     token_resp = req.post(
                         "https://oauth2.googleapis.com/token",
                         data={
@@ -249,43 +583,182 @@ with tab_google:
                             "redirect_uri": redirect_uri,
                             "grant_type": "authorization_code",
                         },
-                        timeout=15,
+                        timeout=25,
                     )
                     tokens = token_resp.json()
-                    if token_resp.status_code == 200 and "access_token" in tokens:
-                        user_resp = req.get(
-                            "https://openidconnect.googleapis.com/v1/userinfo",
-                            headers={"Authorization": f"Bearer {tokens['access_token']}"},
-                            timeout=15,
-                        )
-                        guser = user_resp.json()
 
-                        if user_resp.status_code != 200:
-                            st.error("Could not fetch Google profile. Please try again.")
-                            st.stop()
+                    if "access_token" not in tokens:
+                        st.error("OAuth token exchange failed. Please try again.")
+                        return
 
-                        if not guser.get("email") or not guser.get("sub"):
-                            st.error("Google profile is missing required identity fields.")
-                            st.stop()
+                    user_resp = req.get(
+                        "https://www.googleapis.com/oauth2/v2/userinfo",
+                        headers={"Authorization": f"Bearer {tokens['access_token']}"},
+                        timeout=25,
+                    )
+                    guser = user_resp.json()
 
-                        if guser.get("email_verified") is False:
-                            st.error("Google account email is not verified.")
-                            st.stop()
+                    db_user = google_oauth_upsert(
+                        google_id=guser.get("id"),
+                        name=guser.get("name", "Google User"),
+                        email=guser.get("email"),
+                        avatar_url=guser.get("picture"),
+                    )
 
-                        db_user = google_oauth_upsert(
-                            google_id=guser.get("sub"),
-                            name=guser.get("name", "Google User"),
-                            email=guser.get("email"),
-                            avatar_url=guser.get("picture")
-                        )
+                    if not db_user:
+                        st.error("Failed to create your account. Please try again.")
+                        return
 
-                        st.session_state["google_oauth_state"] = secrets.token_urlsafe(24)
-                        set_session_user(db_user)
-                        st.query_params.clear()
-                        st.success("✅ Signed in with Google!")
-                        st.rerun()
-                    else:
-                        err = tokens.get("error_description") or tokens.get("error") or "unknown error"
-                        st.error(f"OAuth token exchange failed: {err}")
-                except Exception as e:
-                    st.error(f"Google Sign-In error: {e}")
+                    set_session_user(db_user)
+            "Custom Interest (optional)",
+            key="register_custom_interest",
+            placeholder="e.g., Cloud Computing",
+        )
+        _render_inline_error(errors.get("form", ""))
+
+        register_click = st.form_submit_button("Create Account", use_container_width=True)
+
+    if register_click:
+        form_errors = {}
+        reg_name = reg_name.strip()
+        reg_email = reg_email.strip()
+
+        if not reg_name:
+            form_errors["name"] = "Full name is required."
+
+        if not reg_email:
+            form_errors["email"] = "Email is required."
+        elif "@" not in reg_email:
+            form_errors["email"] = "Enter a valid email address."
+
+        if not reg_password:
+            form_errors["password"] = "Password is required."
+        elif len(reg_password) < 6:
+            form_errors["password"] = "Password must be at least 6 characters."
+
+        if reg_password != reg_confirm:
+            form_errors["confirm"] = "Passwords do not match."
+
+        if form_errors:
+            st.session_state["register_errors"] = form_errors
+            status_slot.empty()
+            st.rerun()
+
+        interests = selected_interests[:]
+        if custom_interest.strip():
+            interests.append(custom_interest.strip())
+
+        with st.spinner("Creating your account..."):
+            result = register_user(reg_name, reg_email, reg_password, interests)
+
+        if result["success"]:
+            st.session_state["register_errors"] = {}
+            st.session_state["login_errors"] = {}
+            set_session_user(result["user"])
+            status_slot.success("Account created successfully. Redirecting...")
+            st.rerun()
+
+        st.session_state["register_errors"] = {"form": result["message"]}
+        status_slot.empty()
+        st.rerun()
+
+
+def _render_auth_mode_selector() -> str:
+    options = ["Login", "Register"]
+    current_mode = st.session_state.get("auth_mode", "Login")
+    if current_mode not in options:
+        current_mode = "Login"
+
+    if hasattr(st, "segmented_control"):
+        selected = st.segmented_control(
+            "Auth Mode",
+            options=options,
+            default=current_mode,
+            selection_mode="single",
+            label_visibility="collapsed",
+        )
+        if selected in options:
+            st.session_state["auth_mode"] = selected
+        return st.session_state["auth_mode"]
+
+    selected = st.radio(
+        "Auth Mode",
+        options,
+        index=options.index(current_mode),
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    st.session_state["auth_mode"] = selected
+    return selected
+
+
+def _render_footer_switch(mode: str) -> None:
+    if mode == "Login":
+        st.markdown(
+            "<p class='auth-switch-copy'>Don&#39;t have an account? <a href='?auth=register' target='_self'>Register</a></p>",
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            "<p class='auth-switch-copy'>Already have an account? <a href='?auth=login' target='_self'>Login</a></p>",
+            unsafe_allow_html=True,
+        )
+
+
+st.set_page_config(page_title="Login - AI Quiz App", page_icon="🔐", layout="wide")
+_load_styles()
+_render_sidebar()
+
+if is_logged_in():
+    # If user needs onboarding, show that instead of "already logged in"
+    if st.session_state.get("needs_onboarding"):
+        from utils.auth import require_topics
+        require_topics()
+    st.success(f"You are already logged in as {st.session_state['user_name']}.")
+    st.info("Use the sidebar to open Dashboard or Quiz.")
+    st.stop()
+
+if "auth_mode" not in st.session_state:
+    st.session_state["auth_mode"] = "Login"
+
+switch_mode = st.query_params.get("auth")
+if isinstance(switch_mode, list):
+    switch_mode = switch_mode[0] if switch_mode else None
+if isinstance(switch_mode, str) and switch_mode.lower() in {"login", "register"}:
+    st.session_state["auth_mode"] = switch_mode.capitalize()
+
+_, center, _ = st.columns([1.05, 1.7, 1.05], gap="large")
+
+with center:
+    st.markdown("<div class='auth-shell-anchor'></div>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class='auth-head'>
+            <div class='auth-brand-pill'>
+                <span class='auth-brand-dot'>AI</span>
+                <span>AI Quiz App</span>
+            </div>
+            <p class='section-kicker'>Secure Access</p>
+            <h1 class='auth-title'>AI Quiz App</h1>
+            <p class='auth-sub'>Sign in to continue your learning journey.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("<div class='auth-mode-anchor'></div>", unsafe_allow_html=True)
+    mode = _render_auth_mode_selector()
+
+    with st.container(border=True):
+        st.markdown("<div class='auth-card-anchor'></div>", unsafe_allow_html=True)
+        status_slot = st.empty()
+        status_slot.markdown("<div class='auth-status-slot'></div>", unsafe_allow_html=True)
+
+        if mode == "Login":
+            _render_login_form(status_slot)
+        else:
+            _render_register_form(status_slot)
+
+        _render_google_section()
+        st.markdown("<hr class='subtle-divider' />", unsafe_allow_html=True)
+        _render_footer_switch(mode)

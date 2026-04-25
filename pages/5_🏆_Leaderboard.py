@@ -81,14 +81,15 @@ if leaders:
         with podium[1]:
             l = leaders[0]
             st.markdown(f"""
-            <div style="background: linear-gradient(135deg, #2A2420, #332B1A);
-                        border: 2px solid rgba(255,215,0,0.4); border-radius: 16px;
+            <div style="background: linear-gradient(135deg, rgba(42,36,32,0.9), rgba(51,43,26,0.9));
+                        border: 2px solid rgba(255,215,0,0.45); border-radius: 18px;
                         padding: 2rem; text-align: center;
-                        box-shadow: 0 0 30px rgba(255,215,0,0.15);">
+                        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+                        box-shadow: 0 0 40px rgba(255,215,0,0.12), 0 20px 50px rgba(0,0,0,0.3);">
                 <div style="font-size: 3rem;">👑</div>
                 <h2 style="color: #FFD700; margin: 0.5rem 0 0.25rem;">{l['name']}</h2>
                 <p style="font-size: 2rem; font-weight: 800; color: #FAFAFA;">{l['total_score']} pts</p>
-                <p style="color: #A0A4B8; font-size: 0.9rem;">{l['quizzes_taken']} quizzes · {l['avg_percentage']}% avg</p>
+                <p style="color: #93a6cf; font-size: 0.9rem;">{l['quizzes_taken']} quizzes · {l['avg_percentage']}% avg</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -125,11 +126,13 @@ if leaders:
             rank_icon = f"#{rank}"
 
         is_current = l["name"] == current_user
-        highlight = "border: 1px solid rgba(108,99,255,0.5); background: rgba(108,99,255,0.05);" if is_current else "border: 1px solid rgba(108,99,255,0.08);"
+        highlight = "border: 1px solid rgba(108,99,255,0.5); background: rgba(108,99,255,0.08);" if is_current else "border: 1px solid rgba(108,99,255,0.12);"
 
         st.markdown(f"""
-        <div style="{highlight} border-radius: 12px; padding: 0.75rem 1rem; margin-bottom: 0.4rem;
-                    display: flex; align-items: center; justify-content: space-between;">
+        <div class='leader-row' style="{highlight} border-radius: 14px; padding: 0.85rem 1.1rem; margin-bottom: 0.5rem;
+                    display: flex; align-items: center; justify-content: space-between;
+                    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+                    background: linear-gradient(160deg, rgba(16,27,47,0.7), rgba(12,20,35,0.6));">
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <span style="font-size: 1.3rem; min-width: 40px;">{rank_icon}</span>
                 <div>
@@ -139,15 +142,15 @@ if leaders:
             </div>
             <div style="display: flex; gap: 2rem; align-items: center;">
                 <div style="text-align: center;">
-                    <div style="color: #A0A4B8; font-size: 0.7rem;">QUIZZES</div>
+                    <div style="color: #93a6cf; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;">Quizzes</div>
                     <div style="color: #FAFAFA; font-weight: 600;">{l['quizzes_taken']}</div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="color: #A0A4B8; font-size: 0.7rem;">AVG</div>
-                    <div style="color: #00D2FF; font-weight: 600;">{l['avg_percentage']}%</div>
+                    <div style="color: #93a6cf; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;">Avg</div>
+                    <div style="color: #33c3ff; font-weight: 600;">{l['avg_percentage']}%</div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="color: #A0A4B8; font-size: 0.7rem;">SCORE</div>
+                    <div style="color: #93a6cf; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;">Score</div>
                     <div style="color: #FFD700; font-weight: 700; font-size: 1.1rem;">{l['total_score']}</div>
                 </div>
             </div>

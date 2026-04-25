@@ -1,4 +1,4 @@
-﻿"""
+"""
 Quiz gameplay page.
 """
 import os
@@ -327,10 +327,11 @@ elif st.session_state["quiz_active"]:
         remaining = max(0, total_time - elapsed)
         mins, secs = divmod(remaining, 60)
         timer_color = "#ff6b6b" if remaining < 60 else "#ffb64d" if remaining < 180 else "#1dd58f"
+        timer_class = "timer-urgent" if remaining < 60 else ""
         st.markdown(
             f"""
-            <div class='card-panel' style='padding:0.6rem; text-align:center;'>
-                <div style='font-size:0.75rem; color:#93a6cf;'>Time Left</div>
+            <div class='card-panel {timer_class}' style='padding:0.6rem; text-align:center;'>
+                <div style='font-size:0.75rem; color:#93a6cf; text-transform:uppercase; letter-spacing:0.06em;'>Time Left</div>
                 <div style='font-size:1.4rem; font-weight:800; color:{timer_color};'>{mins:02d}:{secs:02d}</div>
             </div>
             """,
